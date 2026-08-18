@@ -1,0 +1,5 @@
+{
+  "message": "\nInvalid `prisma.user.findFirst()` invocation in\nD:\\quran-sana\\Sana-quran-academy-platform\\scripts\\probe-auth.js:17:36\n\n  14 \n  15 (async () => {\n  16   try {\n→ 17     const user = await prisma.user.findFirst(\nCan't reach database server at `db.gvhejkcmlqtmxvankijc.supabase.co:5432`\n\nPlease make sure your database server is running at `db.gvhejkcmlqtmxvankijc.supabase.co:5432`.",
+  "cause": "",
+  "full": "PrismaClientInitializationError: \nInvalid `prisma.user.findFirst()` invocation in\nD:\\quran-sana\\Sana-quran-academy-platform\\scripts\\probe-auth.js:17:36\n\n  14 \n  15 (async () => {\n  16   try {\n→ 17     const user = await prisma.user.findFirst(\nCan't reach database server at `db.gvhejkcmlqtmxvankijc.supabase.co:5432`\n\nPlease make sure your database server is running at `db.gvhejkcmlqtmxvankijc.supabase.co:5432`."
+}

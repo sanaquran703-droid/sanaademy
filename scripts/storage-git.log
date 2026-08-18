@@ -1,0 +1,23 @@
+﻿=== supabase.ts / storage helpers in src ===
+(none found in src)
+
+=== storage references in src ===
+(end)
+
+=== git status (first 20) ===
+NO .git repository
+
+=== modified files today ===
+D:\quran-sana\Sana-quran-academy-platform\src\app\api\auth\login\route.ts
+D:\quran-sana\Sana-quran-academy-platform\src\app\login\admin\page.tsx
+D:\quran-sana\Sana-quran-academy-platform\src\app\login\student\page.tsx
+D:\quran-sana\Sana-quran-academy-platform\src\app\login\teacher\page.tsx
+D:\quran-sana\Sana-quran-academy-platform\src\app\login\login-form.tsx
+D:\quran-sana\Sana-quran-academy-platform\src\app\login\page.tsx
+D:\quran-sana\Sana-quran-academy-platform\src\app\login\portal-page.tsx
+D:\quran-sana\Sana-quran-academy-platform\src\lib\auth.ts
+D:\quran-sana\Sana-quran-academy-platform\src\lib\constants.ts
+D:\quran-sana\Sana-quran-academy-platform\src\lib\prisma.ts
+D:\quran-sana\Sana-quran-academy-platform\src\middleware.ts
+D:\quran-sana\Sana-quran-academy-platform\prisma\migrations\0000_baseline\migration.sql
+D:\quran-sana\Sana-quran-academy-platform\prisma\migrations\migration_lock.toml
