@@ -36,3 +36,7 @@ next-env.d.ts
 
 # Prisma
 prisma/migrations/*.lock
+
+# Local test helpers (credentials, temporary logs)
+scripts/*-creds.json
+scripts/build-out*.log
