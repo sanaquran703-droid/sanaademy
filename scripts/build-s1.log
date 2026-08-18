@@ -1,0 +1,82 @@
+
+> sana-academy@1.0.0 build
+> next build
+
+   ▲ Next.js 15.5.23
+   - Environments: .env
+
+   Creating an optimized production build ...
+ ✓ Compiled successfully in 22.6s
+   Linting and checking validity of types ...
+   Collecting page data ...
+   Generating static pages (0/37) ...
+   Generating static pages (9/37) 
+   Generating static pages (18/37) 
+   Generating static pages (27/37) 
+ ✓ Generating static pages (37/37)
+   Finalizing page optimization ...
+   Collecting build traces ...
+
+Route (app)                                  Size  First Load JS
+┌ ○ /                                       197 B         106 kB
+├ ○ /_not-found                             998 B         104 kB
+├ ƒ /admin                                  190 B         103 kB
+├ ƒ /admin/enrollments                      197 B         106 kB
+├ ƒ /admin/groups                           169 B         106 kB
+├ ƒ /admin/groups/new                     5.02 kB         118 kB
+├ ƒ /admin/payments                       3.15 kB         116 kB
+├ ƒ /admin/schedules                        197 B         106 kB
+├ ƒ /admin/students                         169 B         106 kB
+├ ƒ /admin/students/new                    5.1 kB         118 kB
+├ ƒ /admin/teachers                         197 B         106 kB
+├ ƒ /admin/teachers/new                   4.59 kB         118 kB
+├ ƒ /api/admin/groups                       190 B         103 kB
+├ ƒ /api/admin/payments/[id]                190 B         103 kB
+├ ƒ /api/admin/students                     190 B         103 kB
+├ ƒ /api/admin/teachers                     190 B         103 kB
+├ ƒ /api/admin/users/[id]/reset-password    190 B         103 kB
+├ ƒ /api/auth/change-password               190 B         103 kB
+├ ƒ /api/auth/login                         190 B         103 kB
+├ ƒ /api/auth/logout                        190 B         103 kB
+├ ƒ /api/student/dashboard                  190 B         103 kB
+├ ƒ /api/student/lessons                    190 B         103 kB
+├ ƒ /api/student/payments                   190 B         103 kB
+├ ƒ /api/student/plan                       190 B         103 kB
+├ ƒ /api/student/profile                    190 B         103 kB
+├ ƒ /api/student/profile/me                 190 B         103 kB
+├ ƒ /api/student/schedule                   190 B         103 kB
+├ ƒ /api/teacher/groups                     190 B         103 kB
+├ ƒ /api/teacher/groups/[id]/meet-link      190 B         103 kB
+├ ƒ /api/teacher/lessons                    190 B         103 kB
+├ ƒ /api/teacher/lessons/today              190 B         103 kB
+├ ƒ /api/teacher/plans/[studentId]          190 B         103 kB
+├ ƒ /api/teacher/students                   190 B         103 kB
+├ ƒ /api/teacher/students/[id]              190 B         103 kB
+├ ƒ /change-password                       3.4 kB         116 kB
+├ ○ /forgot-password                        197 B         106 kB
+├ ƒ /login                                  197 B         106 kB
+├ ƒ /login/admin                           3.6 kB         117 kB
+├ ƒ /login/student                         3.6 kB         117 kB
+├ ƒ /login/teacher                         3.6 kB         117 kB
+├ ƒ /student                              3.81 kB         120 kB
+├ ƒ /student/lessons                      2.99 kB         113 kB
+├ ƒ /student/payments                     7.22 kB         150 kB
+├ ƒ /student/plan                         2.57 kB         116 kB
+├ ƒ /student/profile                      5.44 kB         115 kB
+├ ƒ /student/schedule                     2.67 kB         112 kB
+├ ƒ /teacher                               9.2 kB         133 kB
+├ ƒ /teacher/groups                       4.65 kB         148 kB
+├ ƒ /teacher/students                     4.38 kB         117 kB
+├ ƒ /teacher/students/[id]                  197 B         106 kB
+└ ƒ /teacher/students/[id]/plan           8.09 kB         127 kB
++ First Load JS shared by all              103 kB
+  ├ chunks/1255-a20f6c5e797a687b.js       46.4 kB
+  ├ chunks/4bd1b696-f785427dddbba9fb.js   54.2 kB
+  └ other shared chunks (total)              2 kB
+
+
+ƒ Middleware                              39.8 kB
+
+○  (Static)   prerendered as static content
+ƒ  (Dynamic)  server-rendered on demand
+
