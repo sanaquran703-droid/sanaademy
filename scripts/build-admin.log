@@ -1,0 +1,19 @@
+
+> sana-academy@1.0.0 build
+> next build
+
+   ▲ Next.js 15.5.23
+   - Environments: .env
+
+   Creating an optimized production build ...
+ ✓ Compiled successfully in 3.9min
+   Linting and checking validity of types ...
+   Collecting page data ...
+[Error [PageNotFoundError]: Cannot find module for page: /admin/teachers/new] {
+  code: 'ENOENT'
+}
+
+> Build error occurred
+[Error: Failed to collect page data for /admin/teachers/new] {
+  type: 'Error'
+}
