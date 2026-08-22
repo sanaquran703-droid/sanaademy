@@ -71,3 +71,49 @@ export async function POST(req: Request) {
 
   return NextResponse.json({ ok: true, id: user.student?.id, username });
 }
+
+export async function GET(req: Request) {
+  const { error } = await requireAdmin();
+  if (error) return error;
+
+  const { searchParams } = new URL(req.url);
+  const query = searchParams.get("q")?.trim() || "";
+  const isActive = searchParams.get("active"); // 'true' or 'false'
+
+  const students = await prisma.student.findMany({
+    where: {
+      user: {
+        OR: [
+          { fullName: { contains: query, mode: "insensitive" } },
+          { username: { contains: query, mode: "insensitive" } },
+        ],
+        ...(isActive !== undefined ? { isActive: isActive === "true" } : {}),
+      },
+    },
+    select: {
+      id: true,
+      user: {
+        select: {
+          fullName: true,
+          username: true,
+          phone: true,
+          isActive: true,
+          avatarUrl: true,
+        },
+      },
+      enrollments: {
+        where: { status: "active" },
+        take: 1,
+        select: {
+          academicYear: true,
+          group: { select: { name: true } },
+          program: { select: { name: true } },
+        },
+      },
+    },
+    orderBy: { user: { fullName: "asc" } },
+    take: 100,
+  });
+
+  return NextResponse.json({ ok: true, students });
+}

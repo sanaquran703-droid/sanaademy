@@ -49,3 +49,40 @@ export async function POST(req: Request) {
 
   return NextResponse.json({ ok: true });
 }
+
+export async function GET(req: Request) {
+  const { error } = await requireAdmin();
+  if (error) return error;
+
+  const { searchParams } = new URL(req.url);
+  const query = searchParams.get("q")?.trim() || "";
+
+  const groups = await prisma.group.findMany({
+    where: {
+      OR: [
+        { name: { contains: query, mode: "insensitive" } },
+        { teacher: { user: { fullName: { contains: query, mode: "insensitive" } } } },
+      ],
+    },
+    select: {
+      id: true,
+      name: true,
+      isActive: true,
+      academicYear: true,
+      maxStudents: true,
+      teacher: {
+        select: {
+          user: { select: { fullName: true } },
+        },
+      },
+      program: { select: { name: true } },
+      _count: {
+        select: { enrollments: { where: { status: "active" } } },
+      },
+    },
+    orderBy: { name: "asc" },
+    take: 100,
+  });
+
+  return NextResponse.json({ ok: true, groups });
+}
