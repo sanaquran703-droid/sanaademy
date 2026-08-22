@@ -38,12 +38,13 @@ export default async function TeachersPage() {
               <th className="p-3">الحلقات</th>
               <th className="p-3">إجمالي الطالبات</th>
               <th className="p-3">الحالة</th>
+              <th className="p-3"></th>
             </tr>
           </thead>
           <tbody>
             {teachers.length === 0 && (
               <tr>
-                <td colSpan={5} className="p-8 text-center text-muted-foreground">
+                <td colSpan={6} className="p-8 text-center text-muted-foreground">
                   لا توجد معلمات بعد.
                 </td>
               </tr>
@@ -62,6 +63,11 @@ export default async function TeachersPage() {
                     ) : (
                       <Badge variant="secondary">موقوفة</Badge>
                     )}
+                  </td>
+                  <td className="p-3 text-left">
+                    <a href={`/admin/teachers/${t.id}`} className="text-primary hover:underline">
+                      عرض
+                    </a>
                   </td>
                 </tr>
               );
