@@ -1,14 +1,17 @@
 import Link from "next/link";
-import { LayoutDashboard, Users, GraduationCap, BookOpen, CreditCard, Calendar, ScrollText } from "lucide-react";
+import { LayoutDashboard, Users, GraduationCap, BookOpen, CreditCard, Calendar, ScrollText, Bell } from "lucide-react";
 
 const NAV = [
   { href: "/admin", label: "نظرة عامة", icon: LayoutDashboard },
   { href: "/admin/students", label: "الطالبات", icon: Users },
+  { href: "/admin/assignments", label: "توزيع الطالبات", icon: Users },
   { href: "/admin/enrollments", label: "التسجيلات السنوية", icon: ScrollText },
   { href: "/admin/teachers", label: "المعلمات", icon: GraduationCap },
   { href: "/admin/groups", label: "الحلقات", icon: BookOpen },
   { href: "/admin/schedules", label: "الجداول", icon: Calendar },
+  { href: "/admin/programs", label: "البرامج", icon: BookOpen },
   { href: "/admin/payments", label: "المدفوعات", icon: CreditCard },
+  { href: "/admin/notifications", label: "الإشعارات", icon: Bell },
 ];
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {

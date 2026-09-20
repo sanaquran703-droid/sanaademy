@@ -95,3 +95,52 @@ export async function GET(
     },
   });
 }
+
+export async function DELETE(
+  req: Request,
+  { params }: { params: Promise<{ id: string }> },
+) {
+  const auth = await requireTeacher();
+  if (!auth.ok) return auth.response;
+
+  const { id: studentId } = await params;
+
+  if (!(await assertTeacherOwnsStudent(auth.ctx.teacherId, studentId))) {
+    return NextResponse.json(
+      { error: "هذه الطالبة ليست ضمن طالباتك" },
+      { status: 403 },
+    );
+  }
+
+  try {
+    // Find the active enrollment for this student in one of the teacher's groups
+    const teacherGroups = await prisma.group.findMany({
+      where: { teacherId: auth.ctx.teacherId, isActive: true },
+      select: { id: true },
+    });
+    const groupIds = teacherGroups.map((g) => g.id);
+
+    const enrollment = await prisma.enrollment.findFirst({
+      where: {
+        studentId,
+        groupId: { in: groupIds },
+        status: "active",
+      },
+    });
+
+    if (!enrollment) {
+      return NextResponse.json({ error: "لا يوجد تسجيل نشط لهذه الطالبة في حلقاتك" }, { status: 404 });
+    }
+
+    // Soft delete by updating status to 'withdrawn'
+    await prisma.enrollment.update({
+      where: { id: enrollment.id },
+      data: { status: "withdrawn" },
+    });
+
+    return NextResponse.json({ ok: true });
+  } catch (err) {
+    console.error("Teacher remove student error:", err);
+    return NextResponse.json({ error: "تعذر إزالة الطالبة" }, { status: 500 });
+  }
+}

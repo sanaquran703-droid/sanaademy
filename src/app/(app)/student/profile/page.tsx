@@ -3,10 +3,12 @@
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useToast } from "@/hooks/use-toast";
-import { Camera, Lock } from "lucide-react";
+import { Camera, Lock, User, ShieldCheck, KeyRound } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Card, CardContent } from "@/components/ui/card";
+import { cn } from "@/lib/utils";
 
 export default function StudentProfilePage() {
   const { toast } = useToast();
@@ -22,7 +24,6 @@ export default function StudentProfilePage() {
   const [savingPassword, setSavingPassword] = useState(false);
 
   useEffect(() => {
-    // Client session has no avatarUrl; fetch it once from a server helper.
     fetch("/api/student/profile/me")
       .then(async (res) => {
         const d = await res.json();
@@ -106,86 +107,126 @@ export default function StudentProfilePage() {
   }
 
   return (
-    <div className="max-w-xl space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold text-primary">حسابي</h1>
-        <p className="text-sm text-muted-foreground">الصورة الشخصية وتغيير كلمة السر فقط.</p>
+    <div className="max-w-2xl space-y-6 pb-10">
+      <div className="px-1">
+        <h1 className="text-2xl font-black tracking-tight text-primary">إعدادات الحساب</h1>
+        <p className="text-sm font-medium text-muted-foreground/80">إدارة معلوماتكِ الشخصية وتأمين حسابكِ</p>
       </div>
 
-      {/* Avatar */}
-      <div className="rounded-2xl border border-border bg-card p-6">
-        <div className="flex items-center gap-4">
-          <div className="grid h-20 w-20 place-items-center overflow-hidden rounded-full bg-primary/10 text-primary">
-            {avatarUrl ? (
-              <img src={avatarUrl} alt="الصورة الشخصية" className="h-full w-full object-cover" />
-            ) : (
-              <span className="text-2xl font-bold">{name.charAt(0) || "س"}</span>
-            )}
-          </div>
-          <div>
-            <div className="font-semibold">{name}</div>
-            <p className="mb-2 text-xs text-muted-foreground">صورة أو JPG/PNG/WEBP بحد أقصى 5 ميجابايت</p>
-            <Input
-              ref={avatarInputRef}
-              type="file"
-              accept="image/jpeg,image/png,image/webp"
-              className="hidden"
-              onChange={(e) => uploadAvatar(e.target.files?.[0] ?? null)}
-              disabled={savingAvatar}
-            />
-            <Button
-              variant="outline"
-              size="sm"
-              disabled={savingAvatar}
-              onClick={() => avatarInputRef.current?.click()}
-            >
-              <Camera className="ml-1 h-4 w-4" />
-              {savingAvatar ? "جاري الحفظ..." : "تغيير الصورة"}
-            </Button>
-          </div>
-        </div>
-      </div>
+      <div className="grid gap-6 md:grid-cols-5">
+        {/* Avatar Section */}
+        <Card className="md:col-span-2 rounded-3xl border-border/40 shadow-sm overflow-hidden bg-card/50 backdrop-blur-sm h-fit">
+          <CardContent className="p-8 flex flex-col items-center text-center">
+            <div className="relative group mb-6">
+              <div className="h-32 w-32 rounded-3xl bg-primary/5 overflow-hidden border-4 border-white shadow-xl ring-1 ring-primary/10">
+                {avatarUrl ? (
+                  <img src={avatarUrl} alt={name} className="h-full w-full object-cover" />
+                ) : (
+                  <div className="h-full w-full flex items-center justify-center text-primary text-4xl font-black bg-primary/10">
+                    {name.charAt(0) || "س"}
+                  </div>
+                )}
+              </div>
+              <button 
+                onClick={() => avatarInputRef.current?.click()}
+                disabled={savingAvatar}
+                className="absolute -bottom-2 -right-2 h-10 w-10 rounded-xl bg-primary text-white shadow-lg flex items-center justify-center hover:scale-110 active:scale-95 transition-transform disabled:opacity-50"
+              >
+                <Camera className="h-5 w-5" />
+              </button>
+            </div>
+            
+            <h2 className="font-black text-lg text-primary">{name}</h2>
+            <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mt-1">طالبة سنا</p>
+            
+            <div className="mt-6 w-full pt-6 border-t border-border/40">
+              <div className="flex items-center gap-2 text-xs font-bold text-muted-foreground/70 mb-4 justify-center">
+                <ShieldCheck className="h-4 w-4 text-emerald-500" />
+                <span>حساب مؤمن ونشط</span>
+              </div>
+              <Input
+                ref={avatarInputRef}
+                type="file"
+                accept="image/jpeg,image/png,image/webp"
+                className="hidden"
+                onChange={(e) => uploadAvatar(e.target.files?.[0] ?? null)}
+                disabled={savingAvatar}
+              />
+              <Button
+                variant="outline"
+                className="w-full rounded-2xl h-11 border-border/60 font-black text-xs hover:bg-primary/5 transition-all"
+                onClick={() => avatarInputRef.current?.click()}
+                disabled={savingAvatar}
+              >
+                {savingAvatar ? "جاري الحفظ..." : "تحديث الصورة"}
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
 
-      {/* Password */}
-      <div className="rounded-2xl border border-border bg-card p-6">
-        <div className="mb-4 flex items-center gap-2 font-semibold">
-          <Lock className="h-4 w-4" /> تغيير كلمة السر
-        </div>
-        <div className="space-y-4">
-          <div className="space-y-1.5">
-            <Label htmlFor="cur-pw">كلمة السر الحالية</Label>
-            <Input
-              id="cur-pw"
-              type="password"
-              value={currentPassword}
-              onChange={(e) => setCurrentPassword(e.target.value)}
-              autoComplete="current-password"
-            />
-          </div>
-          <div className="space-y-1.5">
-            <Label htmlFor="new-pw">كلمة السر الجديدة (8 أحرف على الأقل)</Label>
-            <Input
-              id="new-pw"
-              type="password"
-              value={newPassword}
-              onChange={(e) => setNewPassword(e.target.value)}
-              autoComplete="new-password"
-            />
-          </div>
-          <div className="space-y-1.5">
-            <Label htmlFor="cf-pw">تأكيد كلمة السر الجديدة</Label>
-            <Input
-              id="cf-pw"
-              type="password"
-              value={confirmPassword}
-              onChange={(e) => setConfirmPassword(e.target.value)}
-              autoComplete="new-password"
-            />
-          </div>
-          <Button onClick={changePassword} disabled={savingPassword || !currentPassword || !newPassword || !confirmPassword}>
-            {savingPassword ? "جاري التغيير..." : "حفظ كلمة السر"}
-          </Button>
-        </div>
+        {/* Password Section */}
+        <Card className="md:col-span-3 rounded-3xl border-border/40 shadow-sm overflow-hidden bg-card/50 backdrop-blur-sm">
+          <CardContent className="p-8">
+            <div className="mb-6 flex items-center gap-4">
+              <div className="h-10 w-10 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center shadow-inner">
+                <KeyRound className="h-5 w-5" />
+              </div>
+              <div>
+                <h3 className="font-black text-lg">تغيير كلمة السر</h3>
+                <p className="text-xs font-medium text-muted-foreground">تأمين إضافي لحسابكِ الخاص</p>
+              </div>
+            </div>
+            
+            <div className="space-y-5">
+              <div className="space-y-2">
+                <Label htmlFor="cur-pw" className="text-[10px] font-black text-muted-foreground uppercase tracking-widest mr-1">كلمة السر الحالية</Label>
+                <Input
+                  id="cur-pw"
+                  type="password"
+                  className="rounded-2xl h-12 border-border/60 bg-white/50 focus:ring-primary/20"
+                  value={currentPassword}
+                  onChange={(e) => setCurrentPassword(e.target.value)}
+                  autoComplete="current-password"
+                />
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="new-pw" className="text-[10px] font-black text-muted-foreground uppercase tracking-widest mr-1">كلمة السر الجديدة</Label>
+                <Input
+                  id="new-pw"
+                  type="password"
+                  className="rounded-2xl h-12 border-border/60 bg-white/50 focus:ring-primary/20"
+                  value={newPassword}
+                  onChange={(e) => setNewPassword(e.target.value)}
+                  placeholder="8 أحرف على الأقل"
+                  autoComplete="new-password"
+                />
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="cf-pw" className="text-[10px] font-black text-muted-foreground uppercase tracking-widest mr-1">تأكيد كلمة السر</Label>
+                <Input
+                  id="cf-pw"
+                  type="password"
+                  className="rounded-2xl h-12 border-border/60 bg-white/50 focus:ring-primary/20"
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  autoComplete="new-password"
+                />
+              </div>
+              
+              <div className="pt-2">
+                <Button 
+                  onClick={changePassword} 
+                  disabled={savingPassword || !currentPassword || !newPassword || !confirmPassword}
+                  className="w-full rounded-2xl h-12 font-black text-sm shadow-lg shadow-primary/20 transition-transform hover:scale-[1.01] active:scale-[0.99]"
+                >
+                  {savingPassword ? "جاري التغيير..." : "حفظ التغييرات"}
+                </Button>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
       </div>
     </div>
   );

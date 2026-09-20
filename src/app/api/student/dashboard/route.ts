@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
-import { requireStudent, getActiveEnrollment } from "@/lib/student-auth";
+import { requireStudent } from "@/lib/student-auth";
 import { prisma } from "@/lib/prisma";
+import { currentAcademicYear } from "@/lib/academic-year";
 
 function nowMonth(): string {
   const d = new Date();
@@ -13,8 +14,26 @@ export async function GET() {
 
   const { studentId } = auth.ctx;
 
-  const [enrollment, plan, lastEvaluation, todayLesson, pendingOrConfirmed] = await Promise.all([
-    getActiveEnrollment(studentId),
+  const year = currentAcademicYear();
+  const [enrollment, plan, lastEvaluation, lessons, pendingOrConfirmed] = await Promise.all([
+    prisma.enrollment.findMany({
+      where: { studentId, status: "active", academicYear: year },
+      include: {
+        group: {
+          include: {
+            teacher: {
+              include: {
+                user: {
+                  select: { fullName: true, avatarUrl: true }
+                }
+              }
+            },
+            program: { select: { name: true } }
+          }
+        }
+      },
+      orderBy: { createdAt: "desc" }
+    }),
     prisma.memorizationPlan.findUnique({ where: { studentId } }),
     prisma.evaluation.findFirst({
       where: { studentId },
@@ -33,34 +52,51 @@ export async function GET() {
       const now = new Date();
       const dayOfWeek = now.getDay(); // 0=Sun .. 6=Sat
       const startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-      const sched = await prisma.schedule.findFirst({
+      
+      const schedules = await prisma.schedule.findMany({
         where: {
           group: {
-            enrollments: { some: { studentId, status: "active" } },
+            enrollments: { some: { studentId, status: "active", academicYear: year } },
           },
           dayOfWeek,
         },
         select: {
           startTime: true,
           durationMins: true,
-          group: { select: { name: true, meetLink: true, meetingProvider: true } },
+          group: { 
+            select: { 
+              id: true,
+              name: true, 
+              meetLink: true, 
+              meetingProvider: true,
+              teacher: {
+                include: { user: { select: { fullName: true } } }
+              }
+            } 
+          },
         },
+        orderBy: { startTime: "asc" }
       });
-      if (!sched) return null;
-      const [h, m] = sched.startTime.split(":").map(Number);
-      const startsAt = new Date(startOfDay);
-      startsAt.setHours(h, m, 0, 0);
-      const endsAt = new Date(startsAt.getTime() + (sched.durationMins ?? 30) * 60 * 1000);
-      const status =
-        now >= endsAt ? "finished" : now >= startsAt ? "ongoing" : "upcoming";
-      return {
-        groupName: sched.group?.name ?? null,
-        meetLink: sched.group?.meetLink ?? null,
-        meetingProvider: sched.group?.meetingProvider ?? null,
-        startTime: startsAt.toISOString(),
-        durationMins: sched.durationMins,
-        status,
-      };
+
+      return schedules.map(sched => {
+        const [h, m] = sched.startTime.split(":").map(Number);
+        const startsAt = new Date(startOfDay);
+        startsAt.setHours(h, m, 0, 0);
+        const endsAt = new Date(startsAt.getTime() + (sched.durationMins ?? 30) * 60 * 1000);
+        const status =
+          now >= endsAt ? "finished" : now >= startsAt ? "ongoing" : "upcoming";
+        
+        return {
+          groupId: sched.group?.id,
+          groupName: sched.group?.name ?? null,
+          teacherName: sched.group?.teacher?.user?.fullName ?? null,
+          meetLink: sched.group?.meetLink ?? null,
+          meetingProvider: sched.group?.meetingProvider ?? null,
+          startTime: startsAt.toISOString(),
+          durationMins: sched.durationMins,
+          status,
+        };
+      });
     })(),
     prisma.payment.findFirst({
       where: { studentId, monthCovered: nowMonth() },
@@ -69,13 +105,32 @@ export async function GET() {
   ]);
 
   const month = nowMonth();
+  const mainEnrollment = enrollment[0];
 
   return NextResponse.json({
     ok: true,
-    groupId: enrollment?.groupId ?? null,
+    enrollments: enrollment.map(e => ({
+      groupId: e.groupId,
+      groupName: e.group?.name,
+      programName: e.group?.program?.name,
+      teacher: e.group?.teacher ? {
+        name: e.group.teacher.user.fullName,
+        avatarUrl: e.group.teacher.user.avatarUrl
+      } : null,
+    })),
+    groupId: mainEnrollment?.groupId ?? null,
+    groupName: mainEnrollment?.group?.name ?? null,
+    programName: mainEnrollment?.group?.program?.name ?? null,
+    teacher: mainEnrollment?.group?.teacher ? {
+      name: mainEnrollment.group.teacher.user.fullName,
+      avatarUrl: mainEnrollment.group.teacher.user.avatarUrl
+    } : null,
     plan: plan
       ? {
           currentSurah: plan.currentSurah ?? null,
+          currentAyahFrom: plan.currentAyahFrom ?? null,
+          currentAyahTo: plan.currentAyahTo ?? null,
+          reviewSurah: plan.reviewSurah ?? null,
           progressPct: plan.progressPct ?? 0,
         }
       : null,
@@ -93,7 +148,7 @@ export async function GET() {
           overallNote: lastEvaluation.overallNote ?? null,
         }
       : null,
-    todayLesson,
+    todayLessons: lessons, // Array of lessons instead of single todayLesson
     payment: {
       month,
       status: (pendingOrConfirmed as { status: string } | null)?.status ?? "due",

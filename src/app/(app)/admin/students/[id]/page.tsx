@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useState, use } from "react";
+import * as React from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useToast } from "@/hooks/use-toast";
 import { 
@@ -18,7 +19,7 @@ import {
 import { formatDateAr as formatDate, dayNameAr } from "@/lib/utils";
 
 export default function AdminStudentDetailPage({ params }: { params: Promise<{ id: string }> }) {
-  const { id } = use(params);
+  const { id } = React.use(params);
   const { toast } = useToast();
   const router = useRouter();
   const [loading, setLoading] = useState(true);

@@ -105,3 +105,37 @@ export async function PATCH(
 
   return NextResponse.json({ ok: true });
 }
+
+export async function DELETE(
+  req: Request,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  const { error } = await requireAdmin();
+  if (error) return error;
+
+  const { id } = await params;
+
+  try {
+    const student = await prisma.student.findUnique({
+      where: { id },
+      select: { userId: true },
+    });
+    if (!student) return NextResponse.json({ error: "الطالبة غير موجودة" }, { status: 404 });
+
+    await prisma.$transaction([
+      prisma.evaluation.deleteMany({ where: { studentId: id } }),
+      prisma.attendance.deleteMany({ where: { studentId: id } }),
+      prisma.lesson.deleteMany({ where: { studentId: id } }),
+      prisma.enrollment.deleteMany({ where: { studentId: id } }),
+      prisma.memorizationPlan.deleteMany({ where: { studentId: id } }),
+      prisma.payment.deleteMany({ where: { studentId: id } }),
+      prisma.student.delete({ where: { id } }),
+      prisma.user.delete({ where: { id: student.userId } }),
+    ]);
+
+    return NextResponse.json({ ok: true });
+  } catch (err) {
+    console.error("Delete student error:", err);
+    return NextResponse.json({ error: "تعذر حذف الطالبة نهائياً" }, { status: 500 });
+  }
+}

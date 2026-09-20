@@ -94,3 +94,43 @@ export async function PATCH(
 
   return NextResponse.json({ ok: true });
 }
+
+export async function DELETE(
+  req: Request,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  const { error } = await requireAdmin();
+  if (error) return error;
+
+  const { id } = await params;
+
+  try {
+    const teacher = await prisma.teacher.findUnique({
+      where: { id },
+      select: { userId: true },
+    });
+    if (!teacher) return NextResponse.json({ error: "المعلمة غير موجودة" }, { status: 404 });
+
+    const groups = await prisma.group.findMany({
+      where: { teacherId: id },
+      select: { id: true },
+    });
+    const groupIds = groups.map(g => g.id);
+
+    await prisma.$transaction([
+      prisma.evaluation.deleteMany({ where: { lesson: { groupId: { in: groupIds } } } }),
+      prisma.attendance.deleteMany({ where: { lesson: { groupId: { in: groupIds } } } }),
+      prisma.lesson.deleteMany({ where: { groupId: { in: groupIds } } }),
+      prisma.schedule.deleteMany({ where: { groupId: { in: groupIds } } }),
+      prisma.enrollment.deleteMany({ where: { groupId: { in: groupIds } } }),
+      prisma.group.deleteMany({ where: { teacherId: id } }),
+      prisma.teacher.delete({ where: { id } }),
+      prisma.user.delete({ where: { id: teacher.userId } }),
+    ]);
+
+    return NextResponse.json({ ok: true });
+  } catch (err) {
+    console.error("Delete teacher error:", err);
+    return NextResponse.json({ error: "تعذر حذف المعلمة نهائياً" }, { status: 500 });
+  }
+}

@@ -1,0 +1,19 @@
+Starting 14-Step QA Scenario...
+
+✅ Step 1: Admin login 
+✅ Step 2: Admin adds test-student-A & B 
+✅ Step 3: Teacher exists and logs in 
+✅ Step 4: Teacher creates 'حلقة الاختبار' 
+✅ Step 5: Admin distributes A & B to group 
+❌ Step 6: Teacher sees A & B only 
+❌ Step 7: Teacher sets plan for A 
+❌ Step 8: Student A sees correct plan 
+❌ Step 9: Student A sees group name & meet link 
+✅ Step 10: Teacher records lesson for A 
+✅ Step 11: Student A sees lesson in history 
+✅ Step 12: Admin removes student B 
+✅ Step 13: Enrollment B is withdrawn (not in active group) 
+❌ Step 14: Teacher sees A only (B removed) 
+
+--- QA SUMMARY ---
+9/14 PASSED

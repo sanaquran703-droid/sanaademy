@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { requireTeacher, assertTeacherOwnsStudent } from "@/lib/teacher-auth";
+import { createNotification } from "@/lib/notifications";
 
 const schema = z.object({
   currentSurah: z.string().max(100).optional().or(z.literal("").transform(() => undefined)),
@@ -42,6 +43,16 @@ export async function PATCH(
     where: { studentId },
     update: d,
     create: { studentId, ...d },
+    include: { student: { select: { userId: true } } }
+  });
+
+  // Send notification to student
+  await createNotification({
+    userId: plan.student.userId,
+    title: "تحديث في خطة الحفظ",
+    message: `لقد قامت المعلمة ${auth.ctx.fullName} بتحديث خطة حفظك. سورتك الحالية: ${d.currentSurah || "—"}.`,
+    type: "info",
+    link: "/student/plan"
   });
 
   return NextResponse.json({ ok: true, plan });

@@ -126,7 +126,7 @@ function req(urlPath, method, headers, body) {
     console.log(`\nSUMMARY: ${results.filter((r) => r.pass).length}/${results.length} PASSED${fails ? " — FIX FAILURES" : " — ALL PASS"}`);
     process.exit(fails ? 2 : 0);
   } catch (e) {
-    console.error("SETUP_FAIL:", (e.message || "").split("\n").slice(0, 3).join(" | "));
+    console.error("SETUP_FAIL:", e);
     process.exit(1);
   }
 })();

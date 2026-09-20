@@ -54,6 +54,7 @@ export async function GET(req: Request) {
 
   const { searchParams } = new URL(req.url);
   const query = searchParams.get("q")?.trim() || "";
+  const isActive = searchParams.get("active");
 
   const teachers = await prisma.teacher.findMany({
     where: {
@@ -62,10 +63,12 @@ export async function GET(req: Request) {
           { fullName: { contains: query, mode: "insensitive" } },
           { username: { contains: query, mode: "insensitive" } },
         ],
+        ...(isActive === "true" || isActive === "false" ? { isActive: isActive === "true" } : {}),
       },
     },
     select: {
       id: true,
+      userId: true,
       specialty: true,
       user: {
         select: {

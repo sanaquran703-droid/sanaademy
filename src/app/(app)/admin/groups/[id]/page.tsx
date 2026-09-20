@@ -1,32 +1,39 @@
 "use client";
 
-import { useEffect, useState, use } from "react";
+import * as React from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useToast } from "@/hooks/use-toast";
 import { 
   Users, User, Book, Calendar, Video, Link as LinkIcon, 
-  Edit2, Save, X, Plus, Trash2, Clock
+  Edit2, Save, X, Plus, Trash2, Clock, Search
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { dayNameAr } from "@/lib/utils";
 
 export default function AdminGroupDetailPage({ params }: { params: Promise<{ id: string }> }) {
-  const { id } = use(params);
+  const { id } = React.use(params);
   const { toast } = useToast();
   const router = useRouter();
   const [loading, setLoading] = useState(true);
   const [group, setGroup] = useState<any>(null);
   const [teachers, setTeachers] = useState<any[]>([]);
-  const [programs, setPrograms] = useState<any[]>([]);
   
   // Edit State
   const [isEditing, setIsEditing] = useState(false);
   const [editForm, setEditForm] = useState<any>({});
   const [saving, setSaving] = useState(false);
+
+  // Student Management State
+  const [unassignedStudents, setUnassignedStudents] = useState<any[]>([]);
+  const [studentSearch, setStudentSearch] = useState("");
+  const [isAddingStudent, setIsAddingStudent] = useState(false);
+  const [addDialogOpen, setAddDialogOpen] = useState(false);
 
   useEffect(() => {
     fetchData();
@@ -35,18 +42,20 @@ export default function AdminGroupDetailPage({ params }: { params: Promise<{ id:
   async function fetchData() {
     setLoading(true);
     try {
-      const [gRes, tRes] = await Promise.all([
+      const [gRes, tRes, uRes] = await Promise.all([
         fetch(`/api/admin/groups/${id}`),
         fetch("/api/admin/teachers"),
+        fetch("/api/admin/students/unassigned"),
       ]);
       const gData = await gRes.json();
       const tData = await tRes.json();
+      const uData = await uRes.json();
       
       if (!gRes.ok) throw new Error(gData.error || "تعذر تحميل الحلقة");
       
       setGroup(gData.group);
       setTeachers(tData.teachers || []);
-      // Programs might be fetched separately if needed, for now assume simple selection or static
+      setUnassignedStudents(uData.students || []);
       
       setEditForm({
         name: gData.group.name,
@@ -87,6 +96,44 @@ export default function AdminGroupDetailPage({ params }: { params: Promise<{ id:
       setSaving(false);
     }
   }
+
+  async function handleRemoveStudent(enrollmentId: string) {
+    try {
+      const res = await fetch(`/api/admin/enrollments/${enrollmentId}`, {
+        method: "DELETE",
+      });
+      if (!res.ok) throw new Error("تعذر إزالة الطالبة");
+      toast({ title: "تمت إزالة الطالبة بنجاح" });
+      fetchData();
+    } catch (err: any) {
+      toast({ title: err.message, variant: "destructive" });
+    }
+  }
+
+  async function handleAddStudent(studentId: string) {
+    setIsAddingStudent(true);
+    try {
+      const res = await fetch("/api/admin/enrollments/bulk", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ groupId: id, studentIds: [studentId] }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "تعذر إضافة الطالبة");
+      
+      toast({ title: "تمت إضافة الطالبة بنجاح" });
+      setAddDialogOpen(false);
+      fetchData();
+    } catch (err: any) {
+      toast({ title: err.message, variant: "destructive" });
+    } finally {
+      setIsAddingStudent(false);
+    }
+  }
+
+  const filteredUnassigned = unassignedStudents.filter(s => 
+    s.fullName.includes(studentSearch) || s.username.includes(studentSearch)
+  );
 
   if (loading) return <div className="p-10 text-center">جاري التحميل...</div>;
 
@@ -205,14 +252,64 @@ export default function AdminGroupDetailPage({ params }: { params: Promise<{ id:
         </div>
 
         {/* Students List */}
-        <div className="lg:col-span-2">
+        <div className="lg:col-span-2 space-y-6">
           <div className="rounded-2xl border border-border bg-card p-6">
             <div className="mb-4 flex items-center justify-between">
-              <h2 className="font-semibold">الطالبات المسجلات ({group.enrollments.length})</h2>
+              <h2 className="font-semibold text-primary flex items-center gap-2">
+                <Users className="h-5 w-5" />
+                طالبات الحلقة ({group.enrollments.length})
+              </h2>
+              
+              <Dialog open={addDialogOpen} onOpenChange={setAddDialogOpen}>
+                <DialogTrigger asChild>
+                  <Button size="sm" className="rounded-xl">
+                    <Plus className="ml-1 h-4 w-4" />
+                    إضافة طالبة
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="rounded-2xl max-w-md">
+                  <DialogHeader>
+                    <DialogTitle>إضافة طالبة للحلقة</DialogTitle>
+                  </DialogHeader>
+                  <div className="space-y-4 pt-4">
+                    <div className="relative">
+                      <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                      <Input 
+                        placeholder="بحث عن طالبة..." 
+                        className="pl-9 rounded-xl"
+                        value={studentSearch}
+                        onChange={e => setStudentSearch(e.target.value)}
+                      />
+                    </div>
+                    <div className="max-h-[300px] overflow-y-auto space-y-2 pr-1">
+                      {filteredUnassigned.length === 0 ? (
+                        <p className="text-center py-8 text-sm text-muted-foreground">لا يوجد طالبات متاحات حالياً.</p>
+                      ) : filteredUnassigned.map(s => (
+                        <div key={s.id} className="flex items-center justify-between p-3 rounded-xl border border-border hover:bg-muted/30 transition-colors">
+                          <div>
+                            <div className="text-sm font-medium">{s.fullName}</div>
+                            <div className="text-[10px] text-muted-foreground" dir="ltr">@{s.username}</div>
+                          </div>
+                          <Button 
+                            size="sm" 
+                            variant="secondary" 
+                            className="h-8 rounded-lg"
+                            onClick={() => handleAddStudent(s.id)}
+                            disabled={isAddingStudent}
+                          >
+                            {isAddingStudent ? "جاري..." : "إضافة"}
+                          </Button>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </DialogContent>
+              </Dialog>
             </div>
+            
             <div className="space-y-3">
               {group.enrollments.map((en: any) => (
-                <div key={en.id} className="flex items-center justify-between rounded-xl border border-border bg-muted/20 p-3">
+                <div key={en.id} className="flex items-center justify-between rounded-xl border border-border bg-muted/20 p-3 hover:bg-muted/40 transition-colors">
                   <div className="flex items-center gap-3">
                     <div className="grid h-10 w-10 place-items-center overflow-hidden rounded-full bg-primary/10 text-primary">
                       {en.student.user.avatarUrl ? (
@@ -226,7 +323,19 @@ export default function AdminGroupDetailPage({ params }: { params: Promise<{ id:
                       <div className="text-xs text-muted-foreground" dir="ltr">@{en.student.user.username}</div>
                     </div>
                   </div>
-                  <a href={`/admin/students/${en.student.id}`} className="text-sm text-primary hover:underline">الملف الشخصي</a>
+                  <div className="flex items-center gap-2">
+                    <Button variant="ghost" size="sm" asChild className="h-8 text-xs">
+                      <a href={`/admin/students/${en.student.id}`}>الملف الشخصي</a>
+                    </Button>
+                    <Button 
+                      variant="ghost" 
+                      size="icon" 
+                      className="h-8 w-8 text-destructive hover:text-destructive hover:bg-destructive/10"
+                      onClick={() => handleRemoveStudent(en.id)}
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </div>
                 </div>
               ))}
               {group.enrollments.length === 0 && (

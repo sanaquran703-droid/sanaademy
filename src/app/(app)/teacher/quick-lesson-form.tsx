@@ -111,6 +111,7 @@ export function QuickLessonForm({
         body.errorsType = errorTypes.length > 0 ? errorTypes.join("، ") : undefined;
         body.homework = homework || undefined;
         body.teacherNotes = teacherNotes || undefined;
+        body.evaluation = evaluation;
       }
 
       const res = await fetch("/api/teacher/lessons", {

@@ -87,11 +87,12 @@ export async function GET(req: Request) {
           { fullName: { contains: query, mode: "insensitive" } },
           { username: { contains: query, mode: "insensitive" } },
         ],
-        ...(isActive !== undefined ? { isActive: isActive === "true" } : {}),
+        ...(isActive === "true" || isActive === "false" ? { isActive: isActive === "true" } : {}),
       },
     },
     select: {
       id: true,
+      userId: true,
       user: {
         select: {
           fullName: true,

@@ -1,0 +1,13 @@
+Starting 14-Step QA Scenario...
+
+✅ Step 1: Admin login 
+❌ Step 2: Admin adds test-student-A & B 
+✅ Step 3: Teacher exists and logs in 
+✅ Step 4: Teacher creates 'حلقة الاختبار' 
+❌ Step 5: Admin distributes A & B to group 
+❌ Step 6: Teacher sees A & B only 
+❌ Step 7: Teacher sets plan for A 
+QA_ERROR: SyntaxError: Unexpected token '/', "/login" is not valid JSON
+    at JSON.parse (<anonymous>)
+    at runQA (D:\quran-sana\Sana-quran-academy-platform\scripts\test-qa-scenario.js:119:27)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)

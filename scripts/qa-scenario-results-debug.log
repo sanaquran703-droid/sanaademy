@@ -1,0 +1,169 @@
+Starting 14-Step QA Scenario (Debug)...
+
+✅ Step 1: Admin login 
+✅ Step 2: Admin adds test-student-A & B 
+✅ Step 3: Teacher exists and logs in 
+✅ Step 4: Teacher creates 'حلقة الاختبار' 
+✅ Step 5: Admin distributes A & B to group 
+DEBUG Step 6: Teacher students response: {
+  "ok": true,
+  "groups": [
+    {
+      "groupId": "3785492a-a149-4686-81bb-d7ea5f52b1fb",
+      "groupName": "حلقة الفردوس",
+      "programName": "برنامج الحفظ المكثف",
+      "students": [
+        {
+          "id": "ae49def8-0f4d-4cc3-adb9-0458f22662e8",
+          "fullName": "طالبة اختبار 3",
+          "groupName": "حلقة الفردوس"
+        },
+        {
+          "id": "5b523261-0b97-4a97-a1f4-26167a91fc38",
+          "fullName": "طالبة اختبار 4",
+          "groupName": "حلقة الفردوس"
+        }
+      ]
+    },
+    {
+      "groupId": "9026f51c-a576-4975-af1e-ba73a9cc5628",
+      "groupName": "حلقة الكوثر",
+      "programName": "برنامج الحفظ المكثف",
+      "students": [
+        {
+          "id": "4b234b82-a2dd-4b49-9b5f-0c677f982730",
+          "fullName": "طالبة اختبار 5",
+          "groupName": "حلقة الكوثر"
+        },
+        {
+          "id": "4621490e-4be2-4d75-bced-ff14e9c50bd4",
+          "fullName": "طالبة اختبار 6",
+          "groupName": "حلقة الكوثر"
+        }
+      ]
+    },
+    {
+      "groupId": "c373539d-7800-4694-b555-c062ed51a860",
+      "groupName": "حلقة النور",
+      "programName": "برنامج الحفظ المكثف",
+      "students": [
+        {
+          "id": "ff13c70c-f6b6-41d8-99cb-3acdd1915753",
+          "fullName": "طالبة اختبار 1",
+          "groupName": "حلقة النور"
+        },
+        {
+          "id": "86a15696-3a16-412d-acda-597fb11690ed",
+          "fullName": "طالبة اختبار 2",
+          "groupName": "حلقة النور"
+        }
+      ]
+    },
+    {
+      "groupId": "f6e833e4-2f93-452e-a9f9-6c8c913cdeb4",
+      "groupName": "حلقة تجريبية ذاتية",
+      "programName": "برنامج الحفظ المكثف",
+      "students": []
+    },
+    {
+      "groupId": "f5f85578-9cc7-49e4-93ca-292dc7256059",
+      "groupName": "حلقة تجريبية ذاتية",
+      "programName": "برنامج الحفظ المكثف",
+      "students": []
+    },
+    {
+      "groupId": "b782818b-f4ac-47bf-ad91-7d2acd9220a4",
+      "groupName": "حلقة تجريبية ذاتية",
+      "programName": "برنامج الحفظ المكثف",
+      "students": []
+    },
+    {
+      "groupId": "ece10dcf-5211-4784-aa91-a6997d5b6416",
+      "groupName": "حلقة الاختبار",
+      "programName": "برنامج الحفظ المكثف",
+      "students": []
+    },
+    {
+      "groupId": "641b218f-25ae-422d-bbdd-443ba94456bc",
+      "groupName": "حلقة الاختبار 4076",
+      "programName": "برنامج الحفظ المكثف",
+      "students": [
+        {
+          "id": "7b418c79-40b8-4f3a-92b9-765e2b6b160a",
+          "fullName": "test-student-A",
+          "groupName": "حلقة الاختبار 4076"
+        },
+        {
+          "id": "e00f6624-08ba-4b9b-a3ce-227c0e8faf78",
+          "fullName": "test-student-B",
+          "groupName": "حلقة الاختبار 4076"
+        }
+      ]
+    },
+    {
+      "groupId": "70da0e7d-165e-4db6-bdc8-562a82c0251f",
+      "groupName": "حلقة الاختبار 0872",
+      "programName": "برنامج الحفظ المكثف",
+      "students": [
+        {
+          "id": "9fe43651-bb41-48fb-a0a8-d5326151fc0c",
+          "fullName": "test-student-A",
+          "groupName": "حلقة الاختبار 0872"
+        }
+      ]
+    },
+    {
+      "groupId": "265e346b-9407-47f4-94d2-3dcda332f297",
+      "groupName": "حلقة الاختبار 0884",
+      "programName": "برنامج الحفظ المكثف",
+      "students": [
+        {
+          "id": "9e5b987a-6e38-45e9-b418-c2659765ca1f",
+          "fullName": "test-student-A",
+          "groupName": "حلقة الاختبار 0884"
+        },
+        {
+          "id": "50a53dde-c7d4-4747-8a67-91d81643e1b5",
+          "fullName": "test-student-B",
+          "groupName": "حلقة الاختبار 0884"
+        }
+      ]
+    }
+  ],
+  "academicYear": "2025-2026"
+}
+✅ Step 6: Teacher sees A & B only 
+❌ Step 7: Teacher sets plan for A 
+DEBUG Step 8: Student A plan response: {
+  "ok": true,
+  "plan": null
+}
+❌ Step 8: Student A sees correct plan 
+DEBUG Step 9: Student A dashboard response: {
+  "ok": true,
+  "groupId": "265e346b-9407-47f4-94d2-3dcda332f297",
+  "plan": null,
+  "lastEvaluation": null,
+  "todayLesson": {
+    "groupName": "حلقة الاختبار 0884",
+    "meetLink": "https://meet.google.com/qa-test",
+    "meetingProvider": "google_meet",
+    "startTime": "2026-08-24T15:00:00.000Z",
+    "durationMins": 60,
+    "status": "finished"
+  },
+  "payment": {
+    "month": "2026-08",
+    "status": "due",
+    "submittedAt": null
+  }
+}
+❌ Step 9: Student A sees group name & meet link 
+✅ Step 10: Teacher records lesson for A 
+✅ Step 11: Student A sees lesson in history 
+✅ Step 12: Admin removes student B 
+✅ Step 13: Enrollment B is withdrawn (not in active group) 
+✅ Step 14: Teacher sees A only (B removed) 
+
+--- QA SUMMARY ---
+11/14 PASSED

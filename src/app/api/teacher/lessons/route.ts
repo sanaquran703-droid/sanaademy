@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { requireTeacher, assertTeacherOwnsStudent, assertTeacherOwnsGroup } from "@/lib/teacher-auth";
+import { createNotification } from "@/lib/notifications";
 
 const gradeSchema = z.enum(["excellent", "very_good", "good", "needs_review"] as const);
 
@@ -137,6 +138,30 @@ export async function POST(req: Request) {
 
       return lesson;
     });
+
+    // Send notification to student
+    const student = await prisma.student.findUnique({
+      where: { id: d.studentId },
+      select: { userId: true }
+    });
+
+    if (student) {
+      const title = d.attendanceStatus === "present" || d.attendanceStatus === "late" 
+        ? "تقييم جديد لحصتك" 
+        : "تحديث في حالة الحضور";
+      
+      const message = d.attendanceStatus === "present" || d.attendanceStatus === "late"
+        ? `لقد سجلت المعلمة ${auth.ctx.fullName} تقييم حصتك اليوم. يمكنكِ الاطلاع عليه الآن.`
+        : `تم تسجيلكِ كـ "${d.attendanceStatus === "absent" ? "غائبة" : d.attendanceStatus === "excused" ? "غائبة بعذر" : "متأخرة"}" في حصة اليوم.`;
+
+      await createNotification({
+        userId: student.userId,
+        title,
+        message,
+        type: d.attendanceStatus === "present" || d.attendanceStatus === "late" ? "success" : "warning",
+        link: "/student"
+      });
+    }
 
     return NextResponse.json({ ok: true, lessonId: lesson.id });
   } catch (err) {
