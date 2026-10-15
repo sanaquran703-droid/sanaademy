@@ -38,13 +38,12 @@
 - `src/lib/constants.ts` — DASHBOARD_ROUTES (client-safe)
 - `.env` — `DATABASE_URL_USE_POOLER=1` (شبكة هذا الجهاز)
 
-## بيانات الدخول التجريبية (أنشئت بأمان)
+## بيانات الدخول التجريبية
 
 - **URL:** http://localhost:3000/login/admin
 - **username:** `admin`
-- **password:** `GhW7gBHCpZWEiye4`
-- ملاحظة: `mustChangePassword: false` لهذا الحساب التجريبي
-- ملاحظة أمان: حساب تجريبي يجب تغيير كلمة مروره قبل أي استخدام حقيقي
+- **password:** (شغّل `node scripts/seed-admin.js` لإنشاء حساب جديد بكلمة سر عشوائية)
+- ملاحظة: السكربت يولّد كلمة سر عشوائية آمنة ويطبعها في الـterminal فقط
 
 ## نتائج الاختبارات
 

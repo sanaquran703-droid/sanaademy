@@ -1,20 +1,27 @@
-import { createHash } from "crypto";
+import { createHmac } from "crypto";
 import { prisma } from "./prisma";
 
 const WINDOW_MINUTES = 15;
 const MAX_ATTEMPTS_PER_IP = 20;
 const MAX_ATTEMPTS_PER_USERNAME = 5;
 
+function getIpSecret(): string {
+  const secret = process.env.AUTH_SECRET;
+  if (!secret) throw new Error("AUTH_SECRET required for IP hashing");
+  return secret;
+}
+
 export function hashIp(ip: string): string {
-  return createHash("sha256").update(ip).digest("hex");
+  return createHmac("sha256", getIpSecret()).update(ip).digest("hex");
 }
 
 export function getClientIp(headers: Headers): string {
-  return (
-    headers.get("x-forwarded-for")?.split(",")[0]?.trim() ||
-    headers.get("x-real-ip") ||
-    "unknown"
-  );
+  const xff = headers.get("x-forwarded-for");
+  if (xff) {
+    const parts = xff.split(",");
+    return parts[parts.length - 1]?.trim() || "unknown";
+  }
+  return headers.get("x-real-ip") || "unknown";
 }
 
 export async function checkLoginRateLimit(ip: string, username: string) {

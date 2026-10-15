@@ -1,1 +1,0 @@
-Get-Content 'D:\quran-sana\Sana-quran-academy-platform\.env' | Where-Object { $_ -match 'SUPABASE' -or $_ -match 'AUTH_SECRET' -or $_ -match 'NEXTAUTH' } | ForEach-Object { ($_ -replace '=', ' = ').Substring(0, [Math]::Min(60, ($_ -replace '=', ' = ').Length)) }

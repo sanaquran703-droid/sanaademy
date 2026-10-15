@@ -1,13 +1,23 @@
 import { createClient } from "@supabase/supabase-js";
 
-// Server-only Supabase admin client (service role key).
-// Never expose SUPABASE_SERVICE_ROLE_KEY to the browser.
-const supabaseAdmin = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!,
-);
+let supabaseAdmin: ReturnType<typeof createClient> | null = null;
 
-export const supabase = supabaseAdmin;
+function getSupabase() {
+  if (supabaseAdmin) return supabaseAdmin;
+  const url = process.env.SUPABASE_URL;
+  const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  if (!url || !key) {
+    throw new Error("Missing SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY");
+  }
+  supabaseAdmin = createClient(url, key);
+  return supabaseAdmin;
+}
+
+export const supabase = new Proxy({} as ReturnType<typeof createClient>, {
+  get(_target, prop) {
+    return (getSupabase() as any)[prop];
+  },
+});
 
 // Allowed mime types for uploads (payment proofs and avatars).
 const ALLOWED_MIME = [
@@ -61,7 +71,8 @@ async function uploadToBucket(
 
   try {
     const buffer = Buffer.from(await file.arrayBuffer());
-    const { data, error } = await supabaseAdmin.storage
+const client = getSupabase();
+    const { data, error } = await client.storage
       .from(bucket)
       .upload(storagePath, buffer, {
         contentType: file.type,
@@ -70,11 +81,13 @@ async function uploadToBucket(
     if (error) {
       return { ok: false, error: "فشل حفظ الملف. تحققي من الاتصال وحاولي مرة أخرى." };
     }
-    // Sign the URL regardless of bucket policy so it is always readable server-side.
-    const { data: signed } = await supabaseAdmin.storage
+    const { data: signed } = await client.storage
       .from(bucket)
-      .createSignedUrl(data.path, 60 * 60 * 24 * 30); // 30 days
-    return { ok: true, url: signed?.signedUrl ?? `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/${bucket}/${data.path}` };
+      .createSignedUrl(data.path, 60 * 15);
+    if (!signed?.signedUrl) {
+      return { ok: false, error: "فشل إنشاء رابط الملف" };
+    }
+    return { ok: true, url: signed.signedUrl };
   } catch {
     return { ok: false, error: "فشل حفظ الملف. تحققي من الاتصال وحاولي مرة أخرى." };
   }

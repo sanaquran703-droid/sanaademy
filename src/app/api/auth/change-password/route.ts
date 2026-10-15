@@ -24,7 +24,7 @@ export async function POST(req: Request) {
   const ok = await bcrypt.compare(parsed.data.currentPassword, user.passwordHash);
   if (!ok) return NextResponse.json({ error: "كلمة المرور الحالية غير صحيحة" }, { status: 400 });
 
-  const passwordHash = await bcrypt.hash(parsed.data.newPassword, 10);
+  const passwordHash = await bcrypt.hash(parsed.data.newPassword, 12);
   const updated = await prisma.user.update({
     where: { id: user.id },
     data: { passwordHash, mustChangePassword: false },

@@ -5,11 +5,14 @@ import { prisma } from "./prisma";
 import type { UserRole } from "@prisma/client";
 
 const SESSION_COOKIE = "sana_session";
-const SESSION_TTL_DAYS = 30;
+const SESSION_TTL_DAYS = 7;
+const JWT_ALGORITHM = "HS256";
 
 function getSecret() {
   const secret = process.env.AUTH_SECRET;
-  if (!secret) throw new Error("AUTH_SECRET is not set");
+  if (!secret || secret.length < 32) {
+    throw new Error("AUTH_SECRET missing or too short");
+  }
   return new TextEncoder().encode(secret);
 }
 
@@ -23,7 +26,7 @@ export type SessionUser = {
 
 export async function signSession(user: SessionUser): Promise<string> {
   return await new SignJWT({ ...user })
-    .setProtectedHeader({ alg: "HS256" })
+    .setProtectedHeader({ alg: JWT_ALGORITHM })
     .setIssuedAt()
     .setExpirationTime(`${SESSION_TTL_DAYS}d`)
     .sign(getSecret());
@@ -31,7 +34,9 @@ export async function signSession(user: SessionUser): Promise<string> {
 
 export async function verifySession(token: string): Promise<SessionUser | null> {
   try {
-    const { payload } = await jwtVerify(token, getSecret());
+    const { payload } = await jwtVerify(token, getSecret(), {
+      algorithms: [JWT_ALGORITHM],
+    });
     return {
       id: payload.id as string,
       username: payload.username as string,
@@ -48,7 +53,14 @@ export async function getSession(): Promise<SessionUser | null> {
   const store = await cookies();
   const token = store.get(SESSION_COOKIE)?.value;
   if (!token) return null;
-  return verifySession(token);
+  const session = await verifySession(token);
+  if (!session) return null;
+  const user = await prisma.user.findUnique({
+    where: { id: session.id },
+    select: { isActive: true, mustChangePassword: true, role: true },
+  });
+  if (!user || !user.isActive) return null;
+  return { ...session, mustChangePassword: user.mustChangePassword, role: user.role };
 }
 
 export async function setSessionCookie(token: string) {
@@ -74,7 +86,10 @@ export async function authenticate(usernameOrEmail: string, password: string): P
       OR: [{ username: identifier }, { email: identifier }],
     },
   });
-  if (!user || !user.isActive) return null;
+  if (!user || !user.isActive) {
+    await bcrypt.compare(password, "$2a$12$dummyhashforconstanttimecomparisononlyxxxxxxxxxxxxxx");
+    return null;
+  }
   const ok = await bcrypt.compare(password, user.passwordHash);
   if (!ok) return null;
 
@@ -94,6 +109,4 @@ export async function authenticate(usernameOrEmail: string, password: string): P
 
 export const SESSION_COOKIE_NAME = SESSION_COOKIE;
 
-// Kept in src/lib/constants.ts so client components (e.g. the login form)
-// can import it without pulling in this server-only module.
 export { DASHBOARD_ROUTES } from "./constants";

@@ -61,9 +61,10 @@ export async function GET(
     },
   });
 
-  const attendanceRows = await prisma.attendance.findMany({
+const attendanceRows = await prisma.attendance.findMany({
     where: { studentId },
     select: { status: true },
+    take: 200,
   });
   const total = attendanceRows.length;
   const attended = attendanceRows.filter((a) => a.status === "present" || a.status === "late").length;
@@ -139,8 +140,7 @@ export async function DELETE(
     });
 
     return NextResponse.json({ ok: true });
-  } catch (err) {
-    console.error("Teacher remove student error:", err);
+} catch (err) {
     return NextResponse.json({ error: "تعذر إزالة الطالبة" }, { status: 500 });
   }
 }

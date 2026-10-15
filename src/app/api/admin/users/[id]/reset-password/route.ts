@@ -28,11 +28,13 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
     newPassword = crypto.randomBytes(9).toString("base64").replace(/\+/g, "0").replace(/\//g, "1");
   }
 
-  const passwordHash = await bcrypt.hash(newPassword, 10);
+  const passwordHash = await bcrypt.hash(newPassword, 12);
   await prisma.user.update({
     where: { id },
     data: { passwordHash, mustChangePassword: true },
   });
 
-  return NextResponse.json({ ok: true, newPassword });
+  const response = NextResponse.json({ ok: true, newPassword });
+  response.headers.set("Cache-Control", "no-store");
+  return response;
 }

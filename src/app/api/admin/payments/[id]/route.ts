@@ -45,10 +45,12 @@ export async function DELETE(req: Request, { params }: { params: Promise<{ id: s
   const { id } = await params;
 
   try {
-    await prisma.payment.delete({ where: { id } });
+    await prisma.payment.update({
+      where: { id },
+      data: { status: "rejected", note: "deleted-by-admin" },
+    });
     return NextResponse.json({ ok: true });
   } catch (err) {
-    console.error("Delete payment error:", err);
-    return NextResponse.json({ error: "تعذر حذف سجل الدفع" }, { status: 500 });
+    return NextResponse.json({ error: "تعذر تحديث سجل الدفع" }, { status: 500 });
   }
 }

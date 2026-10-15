@@ -1,3 +1,4 @@
+import { randomInt } from "crypto";
 import { prisma } from "./prisma";
 
 const AR_TO_EN: Record<string, string> = {
@@ -23,7 +24,7 @@ export function suggestUsername(fullName: string): string {
   const parts = fullName.trim().split(/\s+/);
   const first = transliterate(parts[0] ?? "");
   const base = first || "user";
-  const suffix = String(Math.floor(10 + Math.random() * 90));
+  const suffix = String(randomInt(10, 99));
   return `sana_${base}${suffix}`;
 }
 

@@ -21,7 +21,29 @@ export async function requireStudent(): Promise<StudentAuthResult> {
     };
   }
 
-  const student = await prisma.student.findUnique({ where: { userId: session.id } });
+  const user = await prisma.user.findUnique({
+    where: { id: session.id },
+    select: { isActive: true, mustChangePassword: true },
+  });
+
+  if (!user || !user.isActive) {
+    return {
+      ok: false,
+      response: NextResponse.json({ error: "غير مصرح" }, { status: 401 }),
+    };
+  }
+
+  if (user.mustChangePassword) {
+    return {
+      ok: false,
+      response: NextResponse.json({ error: "يجب تغيير كلمة المرور أولاً" }, { status: 403 }),
+    };
+  }
+
+  const student = await prisma.student.findUnique({
+    where: { userId: session.id },
+    select: { id: true, userId: true },
+  });
   if (!student) {
     return {
       ok: false,
@@ -35,9 +57,6 @@ export async function requireStudent(): Promise<StudentAuthResult> {
   };
 }
 
-// The student's active enrollment (most recent by creation date).
-// All student endpoints scope their queries to this enrollment — no other
-// student's data can ever be reached through the session-bound API.
 export async function getActiveEnrollment(studentId: string) {
   return prisma.enrollment.findFirst({
     where: { studentId, status: "active" },
