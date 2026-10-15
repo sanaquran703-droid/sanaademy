@@ -1,6 +1,0 @@
-src/app/(app)/admin/students/[id]/page.tsx(18,10): error TS2724: '"@/lib/utils"' has no exported member named 'formatDate'. Did you mean 'formatDateAr'?
-src/app/(app)/admin/students/[id]/page.tsx(349,36): error TS2552: Cannot find name 'Clock'. Did you mean 'Lock'?
-src/app/(app)/admin/teachers/[id]/page.tsx(18,10): error TS2724: '"@/lib/utils"' has no exported member named 'formatDate'. Did you mean 'formatDateAr'?
-src/app/api/admin/students/[id]/route.ts(47,20): error TS2353: Object literal may only specify known properties, and 'createdAt' does not exist in type 'PaymentOrderByWithRelationInput | PaymentOrderByWithRelationInput[]'.
-src/app/api/admin/students/[id]/route.ts(54,11): error TS2353: Object literal may only specify known properties, and 'teacher' does not exist in type 'LessonInclude<DefaultArgs>'.
-src/app/api/admin/teachers/[id]/route.ts(52,7): error TS2353: Object literal may only specify known properties, and 'teacherId' does not exist in type 'LessonWhereInput'.

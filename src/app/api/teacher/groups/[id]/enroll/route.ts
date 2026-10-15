@@ -42,15 +42,34 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
         startDate: new Date(),
         status: "active",
       },
-      include: {
+      select: {
+        id: true,
+        studentId: true,
+        groupId: true,
+        academicYear: true,
+        status: true,
+        startDate: true,
         student: {
-          include: { user: true }
+          select: {
+            id: true,
+            userId: true,
+            user: {
+              select: {
+                fullName: true,
+                username: true,
+              }
+            }
+          }
         },
-        group: true
+        group: {
+          select: {
+            id: true,
+            name: true,
+          }
+        }
       }
     });
 
-    // Notify student
     await prisma.notification.create({
       data: {
         userId: enrollment.student.userId,
@@ -63,7 +82,6 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
 
     return NextResponse.json({ ok: true, enrollment });
   } catch (error) {
-    console.error("[TEACHER_GROUP_ENROLL_POST]", error);
     return NextResponse.json({ error: "تعذّر إضافة الطالبة" }, { status: 500 });
   }
 }

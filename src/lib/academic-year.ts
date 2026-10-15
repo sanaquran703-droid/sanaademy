@@ -1,9 +1,13 @@
-// Egyptian academic year runs September → August.
-// A date in Jan 2027 belongs to the 2026-2027 year; Sep 2027 starts 2027-2028.
+const TZ = "Africa/Cairo";
 
-export function currentAcademicYear(date = new Date()): string {
-  const y = date.getFullYear();
-  const m = date.getMonth(); // 0-indexed
+function cairoNow(): Date {
+  return new Date(new Date().toLocaleString("en-US", { timeZone: TZ }));
+}
+
+export function currentAcademicYear(date?: Date): string {
+  const d = date ?? cairoNow();
+  const y = d.getFullYear();
+  const m = d.getMonth();
   if (m >= 8) return `${y}-${y + 1}`;
   return `${y - 1}-${y}`;
 }
@@ -21,7 +25,7 @@ export function academicYearOptions(count = 3): string[] {
 export function academicYearRange(academicYear: string): { startDate: Date; endDate: Date } {
   const [startY, endY] = academicYear.split("-").map(Number);
   return {
-    startDate: new Date(Date.UTC(startY, 8, 1)),  // Sep 1
-    endDate: new Date(Date.UTC(endY, 7, 31)),     // Aug 31
+    startDate: new Date(Date.UTC(startY, 8, 1)),
+    endDate: new Date(Date.UTC(endY, 7, 31)),
   };
 }

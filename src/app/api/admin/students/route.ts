@@ -37,7 +37,7 @@ export async function POST(req: Request) {
     if (existingEmail) return NextResponse.json({ error: "هذا البريد مسجل بالفعل" }, { status: 409 });
   }
 
-  const passwordHash = await bcrypt.hash(d.password, 10);
+  const passwordHash = await bcrypt.hash(d.password, 12);
   const { startDate } = academicYearRange(d.academicYear);
 
   const user = await prisma.user.create({

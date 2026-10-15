@@ -22,7 +22,29 @@ export async function requireTeacher(): Promise<TeacherAuthResult> {
     };
   }
 
-  const teacher = await prisma.teacher.findUnique({ where: { userId: session.id } });
+  const user = await prisma.user.findUnique({
+    where: { id: session.id },
+    select: { isActive: true, mustChangePassword: true },
+  });
+
+  if (!user || !user.isActive) {
+    return {
+      ok: false,
+      response: NextResponse.json({ error: "غير مصرح" }, { status: 401 }),
+    };
+  }
+
+  if (user.mustChangePassword) {
+    return {
+      ok: false,
+      response: NextResponse.json({ error: "يجب تغيير كلمة المرور أولاً" }, { status: 403 }),
+    };
+  }
+
+  const teacher = await prisma.teacher.findUnique({
+    where: { userId: session.id },
+    select: { id: true, userId: true },
+  });
   if (!teacher) {
     return {
       ok: false,
@@ -40,8 +62,6 @@ function denied(message = "لا يوجد لديك صلاحية للوصول إل
   return NextResponse.json({ error: message }, { status: 403 });
 }
 
-// A student "belongs" to a teacher when the student has an active enrollment
-// in the current academic year whose group is taught by this teacher.
 export async function assertTeacherOwnsStudent(teacherId: string, studentId: string): Promise<boolean> {
   const year = currentAcademicYear();
   const link = await prisma.enrollment.findFirst({

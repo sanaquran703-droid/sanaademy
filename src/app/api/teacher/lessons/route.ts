@@ -33,7 +33,15 @@ const schema = z.object({
   meetLink: z
     .string()
     .max(500)
-    .refine((v) => !v || /^https?:\/\/\S+/.test(v.trim()), "رابط غير صحيح")
+    .refine((v) => {
+      if (!v) return true;
+      try {
+        const u = new URL(v.trim());
+        return u.protocol === "https:";
+      } catch {
+        return false;
+      }
+    }, "رابط غير صحيح")
     .optional(),
 });
 
@@ -165,7 +173,6 @@ export async function POST(req: Request) {
 
     return NextResponse.json({ ok: true, lessonId: lesson.id });
   } catch (err) {
-    console.error("teacher lesson POST transaction failed:", err);
     return NextResponse.json({ error: "تعذّر حفظ الحصة، حاولي مرة أخرى" }, { status: 500 });
   }
 }
