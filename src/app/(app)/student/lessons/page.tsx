@@ -190,7 +190,7 @@ export default function StudentLessonsPage() {
                     {l.evaluation.overallNote && (
                       <div className="flex items-start gap-2 bg-amber-50/20 p-3 rounded-xl border border-amber-100/10 italic text-xs text-muted-foreground">
                         <Info className="h-3.5 w-3.5 text-amber-400 shrink-0 mt-0.5" />
-                        <span>"{l.evaluation.overallNote}"</span>
+                        <span>&quot;{l.evaluation.overallNote}&quot;</span>
                       </div>
                     )}
                   </div>

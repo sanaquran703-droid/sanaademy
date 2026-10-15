@@ -167,8 +167,8 @@ export default function StudentPlanPage() {
                   </div>
                   <h3 className="text-sm font-black text-foreground">ملاحظات المعلمة</h3>
                 </div>
-                <div className="text-sm font-medium text-muted-foreground leading-relaxed bg-muted/10 p-5 rounded-2xl border border-border/30 italic">
-                  "{plan.notes}"
+                  <div className="text-sm font-medium text-muted-foreground leading-relaxed bg-muted/10 p-5 rounded-2xl border border-border/30 italic">
+                  &quot;{plan.notes}&quot;
                 </div>
               </CardContent>
             </Card>

@@ -319,7 +319,7 @@ export default function TeacherDashboard() {
               <MessageSquareQuote className="h-6 w-6 text-primary-foreground/40" />
               <div className="space-y-2">
                 <p className="text-sm font-black leading-relaxed">
-                  "إن الله يحب إذا عمل أحدكم عملاً أن يتقنه" - إتقانكِ في تقييم طالباتكِ هو أمانة تؤجرين عليها.
+                  &quot;إن الله يحب إذا عمل أحدكم عملاً أن يتقنه&quot; - إتقانكِ في تقييم طالباتكِ هو أمانة تؤجرين عليها.
                 </p>
                 <div className="h-1 w-8 bg-primary-foreground/30 rounded-full" />
                 <p className="text-[10px] font-medium text-primary-foreground/60 italic">رسالة اليوم للمعلمة</p>

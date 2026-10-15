@@ -4,6 +4,7 @@ import * as React from "react";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useToast } from "@/hooks/use-toast";
+import { generateTempPassword } from "@/lib/generate-password";
 import { 
   User, Phone, Shield, Lock, Calendar, Book, CreditCard, 
   History, CheckCircle, XCircle, AlertCircle, Copy, Edit2, Save, X, Clock
@@ -103,13 +104,15 @@ export default function AdminStudentDetailPage({ params }: { params: Promise<{ i
   async function handleResetPassword() {
     setResetting(true);
     try {
+      const tempPassword = generateTempPassword();
       const res = await fetch(`/api/admin/users/${student.userId}/reset-password`, {
         method: "POST",
-        body: JSON.stringify({ generateRandom: true }),
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ newPassword: tempPassword }),
       });
       const d = await res.json();
       if (!res.ok) throw new Error(d.error || "تعذر إعادة التعيين");
-      setNewPassword(d.newPassword);
+      setNewPassword(tempPassword);
       setShowPasswordDialog(true);
     } catch (err: any) {
       toast({ title: err.message, variant: "destructive" });

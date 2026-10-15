@@ -116,7 +116,7 @@ export default function StudentPaymentsPage() {
       const form = new FormData();
       form.append("proof", file);
       form.append("monthCovered", month);
-      form.append("amount", "500");
+      // The amount is determined server-side from trusted pricing.
       const res = await fetch("/api/student/payments", { method: "POST", body: form });
       const d = await res.json();
       if (!res.ok) {

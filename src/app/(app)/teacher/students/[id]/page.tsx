@@ -1,4 +1,3 @@
-import React from "react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { requireTeacher } from "@/lib/teacher-auth";
@@ -41,7 +40,7 @@ export default async function StudentProfilePage({
 }: {
   params: Promise<{ id: string }>;
 }) {
-  const { id: studentId } = React.use(params);
+  const { id: studentId } = await params;
   const auth = await requireTeacher();
   if (!auth.ok) {
     notFound();

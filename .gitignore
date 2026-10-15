@@ -41,3 +41,7 @@ prisma/migrations/*.lock
 # Local test helpers (credentials, temporary logs)
 scripts/*-creds.json
 scripts/build-out*.log
+
+# Supabase CLI local state (project refs, pooler/connection strings)
+supabase/.temp/
+.supabase/

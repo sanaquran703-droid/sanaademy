@@ -1,4 +1,7 @@
 import { createClient } from "@supabase/supabase-js";
+import { validateUpload, MAX_FILE_SIZE, type UploadKind } from "./file-validation";
+
+export { MAX_FILE_SIZE };
 
 let supabaseAdmin: ReturnType<typeof createClient> | null = null;
 
@@ -19,16 +22,6 @@ export const supabase = new Proxy({} as ReturnType<typeof createClient>, {
   },
 });
 
-// Allowed mime types for uploads (payment proofs and avatars).
-const ALLOWED_MIME = [
-  "image/jpeg",
-  "image/png",
-  "image/webp",
-  "application/pdf",
-];
-
-export const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
-
 function bucketName(): string {
   return process.env.SUPABASE_STORAGE_BUCKET ?? "sana-uploads";
 }
@@ -41,25 +34,40 @@ export type UploadResult = {
   error: string;
 };
 
+type UploadFile = {
+  name: string;
+  type: string;
+  size: number;
+  arrayBuffer(): Promise<ArrayBuffer> | ArrayBuffer;
+};
+
 // Upload a file under a role-scoped path.
 // - student proof:  payments/{studentId}/{timestamp}-{filename}
 // - avatar:        avatars/{userId}/{timestamp}-{filename}
 async function uploadToBucket(
   bucket: string,
   path: string,
-  file: { name: string; type: string; size: number; arrayBuffer(): Promise<ArrayBuffer> | ArrayBuffer },
+  kind: UploadKind,
+  file: UploadFile,
 ): Promise<UploadResult> {
-  if (!file.type || !ALLOWED_MIME.includes(file.type)) {
-    return {
-      ok: false,
-      error: "نوع الملف غير مسموح. مسموح فقط: صور JPG/PNG/WEBP أو ملف PDF.",
-    };
-  }
   if (file.size > MAX_FILE_SIZE) {
     return {
       ok: false,
       error: "حجم الملف كبير جداً. الحد الأقصى 5 ميجابايت.",
     };
+  }
+
+  let bytes: Uint8Array;
+  try {
+    bytes = new Uint8Array(await file.arrayBuffer());
+  } catch {
+    return { ok: false, error: "تعذّر قراءة الملف المرفوع." };
+  }
+
+  // Content-based validation: never trust the client-declared File.type alone.
+  const check = validateUpload(kind, file.type, file.size, bytes);
+  if (!check.ok) {
+    return { ok: false, error: check.error };
   }
 
   // Normalize the filename: strip directory parts and non-ASCII chars to be safe.
@@ -70,12 +78,11 @@ async function uploadToBucket(
   const storagePath = `${path}/${Date.now()}-${safeName}`;
 
   try {
-    const buffer = Buffer.from(await file.arrayBuffer());
-const client = getSupabase();
+    const client = getSupabase();
     const { data, error } = await client.storage
       .from(bucket)
-      .upload(storagePath, buffer, {
-        contentType: file.type,
+      .upload(storagePath, Buffer.from(bytes), {
+        contentType: check.mime,
         upsert: false,
       });
     if (error) {
@@ -95,14 +102,14 @@ const client = getSupabase();
 
 export async function uploadPaymentProof(
   studentId: string,
-  file: { name: string; type: string; size: number; arrayBuffer(): Promise<ArrayBuffer> | ArrayBuffer },
+  file: UploadFile,
 ): Promise<UploadResult> {
-  return uploadToBucket(bucketName(), `payments/${studentId}`, file);
+  return uploadToBucket(bucketName(), `payments/${studentId}`, "proof", file);
 }
 
 export async function uploadAvatar(
   userId: string,
-  file: { name: string; type: string; size: number; arrayBuffer(): Promise<ArrayBuffer> | ArrayBuffer },
+  file: UploadFile,
 ): Promise<UploadResult> {
-  return uploadToBucket(bucketName(), `avatars/${userId}`, file);
+  return uploadToBucket(bucketName(), `avatars/${userId}`, "avatar", file);
 }

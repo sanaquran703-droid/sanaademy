@@ -5,7 +5,9 @@ import { jwtVerify } from "jose";
 const SESSION_COOKIE = "sana_session";
 
 const PUBLIC_PATHS = ["/", "/login", "/login/admin", "/login/teacher", "/login/student", "/forgot-password", "/about", "/programs", "/faq", "/contact"];
-const PUBLIC_PREFIXES = ["/api/auth", "/_next", "/images", "/favicon"];
+// API routes enforce their own authentication and return JSON errors. Skipping
+// them in the middleware avoids redirecting API clients to an HTML login page.
+const PUBLIC_PREFIXES = ["/api", "/_next", "/images", "/favicon"];
 
 function isPublic(pathname: string) {
   if (PUBLIC_PATHS.includes(pathname)) return true;

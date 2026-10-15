@@ -1,44 +1,51 @@
 import { NextResponse } from "next/server";
+import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { requireAdmin } from "@/lib/api-helpers";
-import { z } from "zod";
+import { readJson, prismaErrorResponse } from "@/lib/api-errors";
+import { idListSchema } from "@/lib/api-validation";
 
-const schema = z.object({
-  ids: z.array(z.string()), // These are student IDs
-});
+// Permanent deletion is an explicit administration requirement.
+const schema = z.object({ ids: idListSchema }); // student IDs
 
 export async function POST(req: Request) {
   const { error } = await requireAdmin();
   if (error) return error;
 
-  try {
-    const body = await req.json();
-    const parsed = schema.safeParse(body);
-    if (!parsed.success) return NextResponse.json({ error: "بيانات غير صحيحة" }, { status: 400 });
-    
-    const { ids } = parsed.data;
+  const body = await readJson(req);
+  if (!body.ok) return body.response;
 
-    // Get user IDs for these students to delete the users as well
+  const parsed = schema.safeParse(body.data);
+  if (!parsed.success) {
+    return NextResponse.json(
+      { error: parsed.error.issues[0]?.message ?? "بيانات غير صحيحة" },
+      { status: 400 },
+    );
+  }
+  const { ids } = parsed.data;
+
+  try {
+    // Resolve user IDs from the students that actually exist.
     const students = await prisma.student.findMany({
       where: { id: { in: ids } },
-      select: { userId: true },
+      select: { id: true, userId: true },
     });
-    const userIds = students.map(s => s.userId);
+    const studentIds = students.map((s) => s.id);
+    const userIds = students.map((s) => s.userId);
 
     await prisma.$transaction([
-      prisma.evaluation.deleteMany({ where: { studentId: { in: ids } } }),
-      prisma.attendance.deleteMany({ where: { studentId: { in: ids } } }),
-      prisma.lesson.deleteMany({ where: { studentId: { in: ids } } }),
-      prisma.enrollment.deleteMany({ where: { studentId: { in: ids } } }),
-      prisma.memorizationPlan.deleteMany({ where: { studentId: { in: ids } } }),
-      prisma.payment.deleteMany({ where: { studentId: { in: ids } } }),
-      prisma.student.deleteMany({ where: { id: { in: ids } } }),
+      prisma.evaluation.deleteMany({ where: { studentId: { in: studentIds } } }),
+      prisma.attendance.deleteMany({ where: { studentId: { in: studentIds } } }),
+      prisma.lesson.deleteMany({ where: { studentId: { in: studentIds } } }),
+      prisma.enrollment.deleteMany({ where: { studentId: { in: studentIds } } }),
+      prisma.memorizationPlan.deleteMany({ where: { studentId: { in: studentIds } } }),
+      prisma.payment.deleteMany({ where: { studentId: { in: studentIds } } }),
+      prisma.student.deleteMany({ where: { id: { in: studentIds } } }),
       prisma.user.deleteMany({ where: { id: { in: userIds } } }),
     ]);
 
-    return NextResponse.json({ ok: true });
+    return NextResponse.json({ ok: true, deleted: studentIds.length });
   } catch (err) {
-    console.error("Bulk delete students error:", err);
-    return NextResponse.json({ error: "تعذر حذف الطالبات نهائياً" }, { status: 500 });
+    return prismaErrorResponse(err, "تعذر حذف الطالبات نهائياً");
   }
 }
