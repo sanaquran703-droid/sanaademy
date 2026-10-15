@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 import { authenticate, signSession, setSessionCookie, DASHBOARD_ROUTES } from "@/lib/auth";
 import { checkLoginRateLimit, recordLoginAttempt, getClientIp } from "@/lib/rate-limit";
+import { logServerError } from "@/lib/server-log";
 
 const schema = z.object({
   username: z.string().min(1, "اسم المستخدم مطلوب"),
@@ -16,6 +17,7 @@ const ROLE_NAMES: Record<string, string> = {
 };
 
 export async function POST(req: Request) {
+  let stage = "parse-body";
   try {
     const body = await req.json();
     const parsed = schema.safeParse(body);
@@ -26,6 +28,7 @@ export async function POST(req: Request) {
     const ip = getClientIp(req.headers);
     const identifier = parsed.data.username.toLowerCase().trim();
 
+    stage = "rate-limit";
     const rl = await checkLoginRateLimit(ip, identifier);
     if (!rl.ok) {
       return NextResponse.json(
@@ -34,7 +37,10 @@ export async function POST(req: Request) {
       );
     }
 
+    stage = "authenticate";
     const user = await authenticate(parsed.data.username, parsed.data.password);
+
+    stage = "record-attempt";
     await recordLoginAttempt(ip, identifier, !!user);
 
     if (!user) {
@@ -55,15 +61,19 @@ export async function POST(req: Request) {
       );
     }
 
+    stage = "sign-session";
     const token = await signSession(user);
+
+    stage = "set-cookie";
     await setSessionCookie(token);
 
     const redirectTo = user.mustChangePassword ? "/change-password" : DASHBOARD_ROUTES[user.role];
     return NextResponse.json({ ok: true, redirectTo });
   } catch (err) {
-    if (process.env.NODE_ENV !== "production") {
-      console.error("[login] unexpected error:", err);
-    }
+    // Safe, always-on diagnostic. Logs only the failing stage and the error
+    // class/Prisma code — never the body, credentials, cookies, tokens, or any
+    // environment value.
+    logServerError("login", stage, err);
     return NextResponse.json({ error: "خطأ في الخادم" }, { status: 500 });
   }
 }
