@@ -8,7 +8,7 @@
     "vercel-build": "prisma generate && next build",
     "start": "next start",
     "lint": "next lint",
-    "test": "node --import tsx --test tests/pricing.test.ts tests/file-validation.test.ts tests/generate-password.test.ts tests/api-validation.test.ts",
+    "test": "node --import tsx --test tests/pricing.test.ts tests/file-validation.test.ts tests/generate-password.test.ts tests/api-validation.test.ts tests/server-log.test.ts tests/datasource.test.ts",
     "db:generate": "prisma generate",
     "db:migrate": "prisma migrate deploy",
     "db:seed": "tsx prisma/seed.ts",
