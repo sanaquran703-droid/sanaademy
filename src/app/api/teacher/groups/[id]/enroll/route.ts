@@ -1,7 +1,10 @@
 import { NextResponse } from "next/server";
+import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { requireTeacher, assertTeacherOwnsGroup } from "@/lib/teacher-auth";
 import { currentAcademicYear } from "@/lib/academic-year";
+
+const schema = z.object({ studentId: z.string().min(1, "معرف الطالبة مطلوب") });
 
 export async function POST(req: Request, { params }: { params: Promise<{ id: string }> }) {
   const auth = await requireTeacher();
@@ -17,12 +20,22 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
   }
 
   try {
-    const { studentId } = await req.json();
-    if (!studentId) {
-      return NextResponse.json({ error: "معرف الطالبة مطلوب" }, { status: 400 });
+    const parsed = schema.safeParse(await req.json());
+    if (!parsed.success) {
+      return NextResponse.json({ error: parsed.error.issues[0]?.message ?? "بيانات غير صحيحة" }, { status: 400 });
     }
+    const { studentId } = parsed.data;
 
     const year = currentAcademicYear();
+
+    // The student must exist and be an active account.
+    const student = await prisma.student.findUnique({
+      where: { id: studentId },
+      select: { id: true, user: { select: { isActive: true } } },
+    });
+    if (!student || !student.user.isActive) {
+      return NextResponse.json({ error: "الطالبة غير موجودة" }, { status: 404 });
+    }
 
     // Check if already enrolled in this specific group for this year
     const existing = await prisma.enrollment.findFirst({
@@ -31,6 +44,38 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
 
     if (existing) {
       return NextResponse.json({ error: "الطالبة مسجلة بالفعل في هذه الحلقة" }, { status: 400 });
+    }
+
+    // Security: a teacher must not be able to self-grant access to a student who
+    // is already enrolled under another teacher. Only unassigned students (or
+    // students already in this teacher's own groups) may be added.
+    const otherTeacherEnrollment = await prisma.enrollment.findFirst({
+      where: {
+        studentId,
+        academicYear: year,
+        status: "active",
+        group: { teacherId: { not: null } },
+        NOT: { group: { teacherId } },
+      },
+      select: { id: true },
+    });
+    if (otherTeacherEnrollment) {
+      return NextResponse.json(
+        { error: "هذه الطالبة مسجلة بالفعل لدى معلمة أخرى" },
+        { status: 403 },
+      );
+    }
+
+    // Capacity check (mirrors admin bulk enrollment).
+    const group = await prisma.group.findUnique({
+      where: { id: groupId },
+      select: { maxStudents: true },
+    });
+    const activeCount = await prisma.enrollment.count({
+      where: { groupId, academicYear: year, status: "active" },
+    });
+    if (group && activeCount >= group.maxStudents) {
+      return NextResponse.json({ error: "الحلقة ممتلئة، لا توجد مقاعد متاحة" }, { status: 400 });
     }
 
     // Create enrollment

@@ -272,7 +272,7 @@ function Testimonials() {
                 <Star key={i} className="h-4 w-4 fill-current" />
               ))}
             </div>
-            <p className="mb-4 text-sm leading-relaxed text-muted-foreground">"{t.text}"</p>
+            <p className="mb-4 text-sm leading-relaxed text-muted-foreground">&quot;{t.text}&quot;</p>
             <div className="text-sm font-semibold text-primary">{t.name}</div>
           </div>
         ))}

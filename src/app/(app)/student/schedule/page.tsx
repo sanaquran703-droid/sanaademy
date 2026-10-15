@@ -86,7 +86,7 @@ export default function StudentSchedulePage() {
                 <Info className="h-4 w-4" />
               </div>
               <p className="text-xs font-bold text-primary/80">
-                يرجى الالتزام بمواعيد الحلقات، واستخدام زر "دخول" للانضمام للحصة في موعدها.
+                يرجى الالتزام بمواعيد الحلقات، واستخدام زر &quot;دخول&quot; للانضمام للحصة في موعدها.
               </p>
             </CardContent>
           </Card>

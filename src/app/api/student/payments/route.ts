@@ -3,6 +3,8 @@ import { z } from "zod";
 import { requireStudent } from "@/lib/student-auth";
 import { prisma } from "@/lib/prisma";
 import { uploadPaymentProof, MAX_FILE_SIZE } from "@/lib/supabase";
+import { getMonthlyFee } from "@/lib/pricing";
+import { prismaErrorResponse } from "@/lib/api-errors";
 
 // Multipart-safe parser: extracts the file (proof) and text fields.
 async function parseMultipart(req: Request): Promise<{
@@ -34,8 +36,6 @@ const monthSchema = z
   .string()
   .regex(/^\d{4}-(0[1-9]|1[0-2])$/, "صيغة الشهر غير صحيحة (استخدمي YYYY-MM)");
 
-const DEFAULT_AMOUNT = 500;
-
 export async function POST(req: Request) {
   const auth = await requireStudent();
   if (!auth.ok) return auth.response;
@@ -62,12 +62,9 @@ export async function POST(req: Request) {
   }
   const monthCovered = parsed.data;
 
-  const amount = Number(fields.amount ?? DEFAULT_AMOUNT);
-  if (isNaN(amount) || amount <= 0 || amount > 100_000) {
-    return NextResponse.json({ error: "مبلغ غير صحيح" }, { status: 400 });
-  }
+  // The amount is derived from trusted server-side pricing, never the client.
+  const amount = getMonthlyFee();
 
-  // Server-side file validation (type + size) happens inside uploadPaymentProof.
   // Extra pre-check so a too-large file is rejected before any upload attempt.
   if (file.size > MAX_FILE_SIZE) {
     return NextResponse.json({ error: "حجم الملف كبير جداً. الحد الأقصى 5 ميجابايت." }, { status: 400 });
@@ -91,32 +88,37 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "تم رفع إثبات لهذا الشهر بالفعل" }, { status: 409 });
   }
 
+  // Final validation is content-based (magic bytes) inside uploadPaymentProof.
   const upload = await uploadPaymentProof(studentId, file);
   if (!upload.ok) {
     return NextResponse.json({ error: upload.error }, { status: 400 });
   }
 
-  const payment = await prisma.payment.create({
-    data: {
-      studentId,
-      amount,
-      currency: "EGP",
-      monthCovered,
-      method: "instapay",
-      proofUrl: upload.url,
-      status: "pending",
-    },
-    select: {
-      id: true,
-      amount: true,
-      currency: true,
-      monthCovered: true,
-      status: true,
-      submittedAt: true,
-    },
-  });
+  try {
+    const payment = await prisma.payment.create({
+      data: {
+        studentId,
+        amount,
+        currency: "EGP",
+        monthCovered,
+        method: "instapay",
+        proofUrl: upload.url,
+        status: "pending",
+      },
+      select: {
+        id: true,
+        amount: true,
+        currency: true,
+        monthCovered: true,
+        status: true,
+        submittedAt: true,
+      },
+    });
 
-  return NextResponse.json({ ok: true, payment }, { status: 201 });
+    return NextResponse.json({ ok: true, payment }, { status: 201 });
+  } catch (err) {
+    return prismaErrorResponse(err, "تعذّر حفظ سجل الدفع");
+  }
 }
 
 export async function GET() {
