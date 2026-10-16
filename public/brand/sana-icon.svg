@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none" role="img" aria-label="شعار أكاديمية سَنَا">
+  <rect width="64" height="64" rx="16" fill="#101B2D"/>
+  <path d="M18 46C18 30 23 19 32 13C41 19 46 30 46 46" stroke="#C9A961" stroke-width="2.6" stroke-linecap="round"/>
+  <path d="M32 13V24" stroke="#C9A961" stroke-width="2" stroke-linecap="round"/>
+  <path d="M27 27.5L32 32.5L37 27.5L32 22.5Z" fill="#C9A961"/>
+  <path d="M32 44C28 40.5 22 39.5 17 41.5V49C22 47.5 28 48 32 51C36 48 42 47.5 47 49V41.5C42 39.5 36 40.5 32 44Z" fill="#2F6F73" stroke="#C9A961" stroke-width="1.6" stroke-linejoin="round"/>
+  <path d="M32 44V51" stroke="#C9A961" stroke-width="1.6"/>
+</svg>

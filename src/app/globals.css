@@ -2,60 +2,78 @@
 @tailwind components;
 @tailwind utilities;
 
+/*
+  SANA Academy design tokens — per the official UI guide (دليل مطوري الواجهة).
+  Primary palette:
+    SANA Green   #0A423A
+    Metallic Gold #B0894A
+    Warm Cream   #F8F5EE
+  Portal card surfaces:
+    Students #FDF1DC
+    Teachers #DDF0E8
+    Admin    #EAE0F5
+*/
 @layer base {
   :root {
-    /* Sana palette — olive, sage, muted gold, off-white */
-    --background: 40 33% 97%;            /* off-white */
-    --foreground: 90 15% 15%;            /* deep olive text */
+    --background: 42 42% 96%;            /* warm cream */
+    --foreground: 171 45% 12%;           /* dark emerald ink */
 
-    --card: 40 33% 99%;
-    --card-foreground: 90 15% 15%;
+    --card: 42 46% 98%;
+    --card-foreground: 171 45% 12%;
 
-    --popover: 40 33% 99%;
-    --popover-foreground: 90 15% 15%;
+    --popover: 42 46% 98%;
+    --popover-foreground: 171 45% 12%;
 
-    --primary: 88 22% 28%;               /* dark olive */
-    --primary-foreground: 40 33% 97%;
+    --primary: 171 74% 15%;              /* SANA green */
+    --primary-foreground: 42 45% 96%;
 
-    --secondary: 100 15% 55%;            /* sage */
-    --secondary-foreground: 40 33% 97%;
+    --secondary: 171 30% 90%;            /* soft mint */
+    --secondary-foreground: 171 74% 15%;
 
-    --muted: 40 20% 92%;
-    --muted-foreground: 90 10% 40%;
+    --muted: 42 30% 92%;
+    --muted-foreground: 200 8% 42%;      /* secondary text */
 
-    --accent: 42 45% 55%;                /* muted gold */
-    --accent-foreground: 40 33% 15%;
+    --accent: 37 41% 49%;                /* metallic gold */
+    --accent-foreground: 42 45% 97%;
 
-    --destructive: 0 60% 45%;
-    --destructive-foreground: 40 33% 97%;
+    --destructive: 0 62% 47%;
+    --destructive-foreground: 42 45% 97%;
 
-    --border: 40 15% 85%;
-    --input: 40 15% 88%;
-    --ring: 88 22% 28%;
+    --border: 42 25% 85%;
+    --input: 42 25% 88%;
+    --ring: 171 74% 15%;
 
-    --radius: 0.75rem;
+    --radius: 1rem;
+
+    /* Raw brand tokens (usable directly as var(--brand-*)) */
+    --brand-green: #0a423a;
+    --brand-gold: #b0894a;
+    --brand-cream: #f8f5ee;
+    --brand-student: #fdf1dc;
+    --brand-teacher: #ddf0e8;
+    --brand-admin: #eae0f5;
   }
 
   .dark {
-    --background: 90 15% 10%;
-    --foreground: 40 33% 95%;
-    --card: 90 15% 12%;
-    --card-foreground: 40 33% 95%;
-    --popover: 90 15% 12%;
-    --popover-foreground: 40 33% 95%;
-    --primary: 42 45% 60%;
-    --primary-foreground: 90 15% 12%;
-    --secondary: 100 12% 30%;
-    --secondary-foreground: 40 33% 95%;
-    --muted: 90 10% 18%;
-    --muted-foreground: 40 15% 65%;
-    --accent: 42 45% 55%;
-    --accent-foreground: 90 15% 12%;
+    --background: 171 30% 8%;
+    --foreground: 42 40% 94%;
+    --card: 171 28% 11%;
+    --card-foreground: 42 40% 94%;
+    --popover: 171 28% 11%;
+    --popover-foreground: 42 40% 94%;
+    --primary: 165 45% 40%;
+    --primary-foreground: 171 30% 8%;
+    --secondary: 171 25% 20%;
+    --secondary-foreground: 42 40% 94%;
+    --muted: 171 20% 16%;
+    --muted-foreground: 42 15% 70%;
+    --accent: 37 45% 52%;
+    --accent-foreground: 171 30% 8%;
     --destructive: 0 55% 50%;
-    --destructive-foreground: 40 33% 95%;
-    --border: 90 10% 22%;
-    --input: 90 10% 22%;
-    --ring: 42 45% 55%;
+    --destructive-foreground: 42 40% 94%;
+    --border: 171 20% 22%;
+    --input: 171 20% 22%;
+    --ring: 37 45% 52%;
   }
 }
 
@@ -68,6 +86,11 @@
   }
   html {
     scroll-behavior: smooth;
+    /* Keep anchored sections clear of the sticky header. */
+    scroll-padding-top: 6rem;
+  }
+  ::selection {
+    background-color: hsl(var(--accent) / 0.28);
   }
 }
 
@@ -78,5 +101,71 @@
   .bg-pattern {
     background-image: radial-gradient(circle at 1px 1px, hsl(var(--muted-foreground) / 0.08) 1px, transparent 0);
     background-size: 24px 24px;
+  }
+  /* Subtle Islamic-inspired geometric grid for decorative surfaces. */
+  .bg-geometry {
+    background-image:
+      linear-gradient(45deg, hsl(var(--accent) / 0.06) 25%, transparent 25%, transparent 75%, hsl(var(--accent) / 0.06) 75%),
+      linear-gradient(45deg, hsl(var(--accent) / 0.06) 25%, transparent 25%, transparent 75%, hsl(var(--accent) / 0.06) 75%);
+    background-size: 28px 28px;
+    background-position: 0 0, 14px 14px;
+  }
+  /* Gold hairline frame used on premium editorial panels. */
+  .ring-gold {
+    box-shadow: inset 0 0 0 1px hsl(var(--accent) / 0.45);
+  }
+  /* Arch (mihrab) silhouette used by the Quranic verse panel. */
+  .arch-top {
+    border-radius: 50% 50% 1.5rem 1.5rem / 20% 20% 1.5rem 1.5rem;
+  }
+  .text-balance {
+    text-wrap: balance;
+  }
+  /* ---- Decorative motion (all purely ornamental) ---- */
+  @keyframes sana-spin-slow {
+    to {
+      transform: rotate(360deg);
+    }
+  }
+  @keyframes sana-float {
+    0%,
+    100% {
+      transform: translateY(0);
+    }
+    50% {
+      transform: translateY(-12px);
+    }
+  }
+  @keyframes sana-twinkle {
+    0%,
+    100% {
+      opacity: 0.12;
+      transform: scale(0.65) rotate(0deg);
+    }
+    50% {
+      opacity: 0.9;
+      transform: scale(1.15) rotate(45deg);
+    }
+  }
+  .animate-spin-slow {
+    animation: sana-spin-slow 90s linear infinite;
+  }
+  .animate-spin-slow-rev {
+    animation: sana-spin-slow 130s linear infinite reverse;
+  }
+  .animate-float {
+    animation: sana-float 7s ease-in-out infinite;
+  }
+  .animate-twinkle {
+    animation: sana-twinkle 4.5s ease-in-out infinite;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-spin-slow,
+  .animate-spin-slow-rev,
+  .animate-float,
+  .animate-twinkle {
+    animation: none !important;
   }
 }

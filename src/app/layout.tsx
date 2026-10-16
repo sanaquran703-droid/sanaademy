@@ -10,9 +10,22 @@ const tajawal = Tajawal({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"),
   title: "سَنَا | أكاديمية القرآن الكريم",
   description:
-    "أكاديمية سَنَا لتحفيظ القرآن الكريم — حلقات أونلاين للطالبات والأطفال بإشراف معلمات متخصصات، ومتابعة مستمرة لخطة الحفظ والمراجعة.",
+    "أكاديمية سَنَا للقرآن الكريم — مساحة للتعلّم والتقدّم في رحلة القرآن، بحلقات أونلاين بإشراف معلمات متخصصات ومتابعة مستمرة لخطة الحفظ والمراجعة.",
+  icons: {
+    icon: [
+      { url: "/brand/sana-icon.svg", type: "image/svg+xml" },
+      { url: "/brand/sana-emblem.png", type: "image/png" },
+    ],
+    apple: "/brand/sana-emblem.png",
+  },
+  openGraph: {
+    title: "سَنَا | أكاديمية القرآن الكريم",
+    description: "رحلتك مع القرآن تبدأ هنا.",
+    type: "website",
+  },
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
