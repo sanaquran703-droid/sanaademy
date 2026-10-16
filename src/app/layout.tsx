@@ -10,7 +10,7 @@ const tajawal = Tajawal({
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000"),
+  metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"),
   title: "سَنَا | أكاديمية القرآن الكريم",
   description:
     "أكاديمية سَنَا للقرآن الكريم — مساحة للتعلّم والتقدّم في رحلة القرآن، بحلقات أونلاين بإشراف معلمات متخصصات ومتابعة مستمرة لخطة الحفظ والمراجعة.",
