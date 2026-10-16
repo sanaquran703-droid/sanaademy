@@ -1,6 +1,6 @@
+import Image from "next/image";
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { Sparkles, LogOut } from "lucide-react";
 import { getSession } from "@/lib/auth";
 import { LogoutButton } from "@/components/logout-button";
 import { NotificationBell } from "@/components/notification-bell";
@@ -15,13 +15,17 @@ export default async function AppLayout({ children }: { children: React.ReactNod
     <div className="flex min-h-screen flex-col">
       <header className="sticky top-0 z-40 border-b border-border/50 bg-background/70 backdrop-blur-xl shadow-sm">
         <div className="container flex h-16 items-center justify-between px-4">
-          <Link href={`/${session.role}`} className="flex items-center gap-3 transition-transform hover:scale-105 active:scale-95">
-            <div className="grid h-9 w-9 place-items-center rounded-xl bg-primary text-primary-foreground shadow-lg shadow-primary/20">
-              <Sparkles className="h-5 w-5" />
-            </div>
+          <Link href={`/${session.role}`} className="flex items-center gap-3 transition-transform hover:scale-[1.02] active:scale-95">
+            <Image
+              src="/brand/sana-emblem.png"
+              alt="شعار أكاديمية سَنَا"
+              width={40}
+              height={40}
+              className="h-9 w-9 rounded-xl object-contain"
+            />
             <div className="text-sm">
               <div className="font-black text-primary text-base leading-tight tracking-tight">سَنَا</div>
-              <div className="text-[9px] font-bold text-muted-foreground/60 uppercase tracking-widest">{roleLabel}</div>
+              <div className="text-[9px] font-bold text-muted-foreground/70 uppercase tracking-widest">{roleLabel}</div>
             </div>
           </Link>
           <div className="flex items-center gap-4 text-sm">
